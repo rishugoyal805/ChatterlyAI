@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { cookies } from "next/headers"; // 👈 import this for setting cookies
 
 export async function POST(req) {
   try {
@@ -32,7 +33,19 @@ export async function POST(req) {
       { expiresIn: "7d" }
     );
 
-    return NextResponse.json({ token, email: user.email }, { status: 200 })
+    const res = NextResponse.json(
+      { message: "Login successful", email: user.email },
+      { status: 200 }
+    );
+
+    res.cookies.set("auth_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    });
+
+    return res;
 
   } catch (error) {
     console.error("Login error:", error);
