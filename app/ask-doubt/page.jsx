@@ -93,11 +93,14 @@ export default function AskDoubtPage() {
     setLoading(false)
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("email")
-    router.push("/")
-  }
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      router.push("/login"); // Or "/"
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   useEffect(() => {
     setTimeout(() => {
