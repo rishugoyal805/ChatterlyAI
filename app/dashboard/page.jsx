@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BookOpen, Plus, Search, Bell, User, LogOut, Menu, X, Clock, TrendingUp, MessageCircle ,Lightbulb,LayoutDashboard,MessageCircleMore} from "lucide-react"
+import { BookOpen, Plus, Search, Bell, User, LogOut, Menu, X, Clock, TrendingUp, MessageCircle, Lightbulb, LayoutDashboard, MessageCircleMore } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -41,10 +41,14 @@ export default function Dashboard() {
   //   }
   // }
 
-  const handleLogout = () => {
-    localStorage.removeItem("token")
-    router.push("/")
-  }
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/logout", { method: "POST" });
+      router.push("/login"); // Or "/"
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
 
   // const filteredSubjects = subjects.filter((subject) => subject.name?.toLowerCase().includes(searchTerm.toLowerCase()))
 
