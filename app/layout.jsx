@@ -18,17 +18,19 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 
-// ✅ Font loader must be top-level, outside component
+// ✅ Initialize font outside the component
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Askdemia - Learn Smarter, Not Harder",
-  description: "Join thousands of students who are revolutionizing their learning experience with collaborative study tools and expert guidance.",
+  description:
+    "Join thousands of students who are revolutionizing their learning experience with collaborative study tools and expert guidance.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      {/* ✅ inter.className must be defined here */}
       <body className={inter.className}>{children}</body>
     </html>
   );
