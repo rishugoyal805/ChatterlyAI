@@ -1,15 +1,17 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BookOpen, User, Save, ArrowLeft, Menu, X, LogOut, Mail, School, BookMarked, MessageCircleMore, Lightbulb, LayoutDashboard } from "lucide-react"
+import { BookOpen, Bell, User, Save, ArrowLeft, Menu, X, LogOut, Mail, School, BookMarked, MessageCircleMore, Lightbulb, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { Lock } from "lucide-react"
 
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     nickname: "",
+    pass: "",
     // branch: "",
   })
   const [isLoading, setIsLoading] = useState(true)
@@ -42,6 +44,11 @@ export default function ProfilePage() {
     setIsSaving(true)
     setError("")
     setSuccess("")
+
+    if (!formData.pass) {
+      setError("Password is required.")
+      return
+    }
 
     try {
       const response = await fetch("/api/profile", {
@@ -109,7 +116,7 @@ export default function ProfilePage() {
               <LayoutDashboard className="w-5 h-5" />
               <span>Dashboard</span>
             </Link>
-            <Link href="/ask-doubt" className="flex items-center space-x-3 px-4 py-3 bg-purple-100 text-purple-700 rounded-xl">
+            <Link href="/ask-doubt" className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
               <Lightbulb className="w-5 h-5" />
               <span>Chatbot</span>
             </Link>
@@ -117,10 +124,10 @@ export default function ProfilePage() {
               <MessageCircleMore className="w-5 h-5" />
               <span>Chat with Friends</span>
             </Link>
-            <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+            {/* <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 bg-purple-100 text-purple-700 rounded-xl">
               <User className="w-5 h-5" />
               <span>Profile</span>
-            </Link>
+            </Link> */}
           </nav>
         </div>
 
@@ -153,6 +160,18 @@ export default function ProfilePage() {
               >
                 <ArrowLeft className="w-5 h-5 mr-2" />
                 Back to Dashboard
+              </Link>
+            </div>
+            {/* Right section: Notification + Profile */}
+            <div className="flex items-center space-x-4">
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+                <Bell className="w-6 h-6 text-gray-600" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              </button>
+              <Link href="/profile">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center cursor-pointer">
+                  <User className="w-5 h-5 text-white" />
+                </div>
               </Link>
             </div>
           </div>
@@ -237,6 +256,25 @@ export default function ProfilePage() {
                       required
                       className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                       placeholder="Enter your email address"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="pass" className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center">
+                        <Lock className="w-4 h-4 mr-2" />
+                        New Password
+                      </div>
+                    </label>
+                    <input
+                      type="password"
+                      id="pass"
+                      name="pass"
+                      value={formData.pass}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                      placeholder="Enter new password"
                     />
                   </div>
 
