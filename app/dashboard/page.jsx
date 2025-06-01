@@ -97,19 +97,16 @@ export default function Dashboard() {
               <span>Chatbot</span>
             </Link>
             <Link
-              href="/chat1"
+              href="/chat"
               className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <MessageCircleMore className="w-5 h-5" />
               <span>Chat with Friends</span>
             </Link>
-            <Link
-              href="/profile"
-              className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
+            {/* <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
               <User className="w-5 h-5" />
               <span>Profile</span>
-            </Link>
+            </Link> */}
           </nav>
         </div>
 
@@ -144,9 +141,11 @@ export default function Dashboard() {
                 <Bell className="w-6 h-6 text-gray-600" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-white" />
-              </div>
+              <Link href="/profile">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center cursor-pointer">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+              </Link>
             </div>
           </div>
         </header>
