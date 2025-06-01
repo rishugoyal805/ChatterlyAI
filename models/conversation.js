@@ -9,7 +9,7 @@ export async function createConversation() {
   return result.insertedId;
 }
 
-export async function addMessagePair(convoId, userMessageId, aiResponseId) {
+export async function addMessagePairToConversation(convoId, userMessageId, aiResponseId) {
   const { db } = await connectToDatabase();
   await db.collection('conversations').updateOne(
     { _id: new ObjectId(convoId) },
