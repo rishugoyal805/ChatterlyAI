@@ -23,6 +23,8 @@ const handler = NextAuth({
             createdAt: new Date(),
             name: user.name || "",
             nickname: "",
+            chats_arr:[],
+            frnd_arr:[],
             // image: user.image || "",
             // provider: account.provider || "google",
           });
