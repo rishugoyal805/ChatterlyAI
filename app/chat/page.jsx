@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLayoutEffect } from "react"
 import axios from "axios"
+import { io } from "socket.io-client";
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { FaCopy, FaWhatsapp, FaEnvelope } from "react-icons/fa";
@@ -23,6 +24,7 @@ export default function AskDoubtPage() {
   const [userEmail, setUserEmail] = useState("")
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+  const socket = useRef(null);
   const router = useRouter()
   const handleCopy = (text) => navigator.clipboard.writeText(text);
   const sendToWhatsApp = (text) => window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
@@ -78,19 +80,24 @@ export default function AskDoubtPage() {
   }, [])
 
   useEffect(() => {
-    if (!chatboxId) return;
+    if (!userEmail || !chatboxId) return;
 
-    const interval = setInterval(async () => {
-      const res = await fetch(`/api/get-chatbox?chatbox_id=${chatboxId}`);
-      const data = await res.json();
+    if (!socket.current) {
+      socket.current = io("https://chatterly-backend-8dwx.onrender.com", {
+        transports: ["websocket"], // ensure real-time connection
+      });
+    }
 
-      if (data.chatbox?.messages) {
-        setMessages(data.chatbox.messages);
-      }
-    }, 1000); // Poll every 3 seconds
+    socket.current.emit("join-room", chatboxId);
 
-    return () => clearInterval(interval);
-  }, [chatboxId]);
+    socket.current.on("receive-message", (message) => {
+      setMessages((prev) => [...prev, message]);
+    });
+
+    return () => {
+      socket.current?.off("receive-message");
+    };
+  }, [chatboxId, userEmail]);
 
   const handleNewChat = async () => {
     const friendEmail = prompt("Enter your friend's email to start a new chat:");
@@ -140,27 +147,18 @@ export default function AskDoubtPage() {
     setMessages(data.chatbox.messages); // assuming populated messages
   };
 
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!input.trim() || !chatboxId || !userEmail) return;
 
-    const newMessage = {
+    const message = {
       senderEmail: userEmail,
-      chatboxId: chatboxId,
+      chatboxId,
       text: input,
     };
 
-    try {
-      const res = await fetch("/api/send-message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newMessage),
-      });
-      const saved = await res.json();
-      setMessages((prev) => [...prev, saved.message]);
-      setInput("");
-    } catch (err) {
-      console.error("Failed to send message:", err);
-    }
+    socket.current.emit("send-message", message); // send to server
+    setMessages((prev) => [...prev, message]);
+    setInput("");
   };
 
   const handleLogout = async () => {
@@ -392,8 +390,10 @@ export default function AskDoubtPage() {
             </div>
 
             {/* Chat Input Fixed at Bottom */}
-            <div className="absolute bottom-0 left-0 right-0 px-6 py-4 bg-white/90 backdrop-blur-md border-t border-gray-200">
-              <div className="flex items-center gap-2">
+            {/* <div className="absolute bottom-0 left-0 right-0 px-6 py-4 bg-white/90 backdrop-blur-md border-t border-gray-200">
+              <div className="flex items-center gap-2"> */}
+            < div className="fixed bottom-0 left-0 right-0 lg:ml-64 bg-white/90 backdrop-blur-lg border-t border-white/20 px-6 py-4 z-50" >
+              <div className="flex items-center gap-2 max-w-7xl mx-auto">
                 <input
                   ref={inputRef}
                   type="text"
@@ -405,7 +405,7 @@ export default function AskDoubtPage() {
                 />
                 <button
                   onClick={sendMessage}
-                  disabled={!input.trim()}
+
                   className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full transition ${!input.trim() ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"
                     }`}
                 >
