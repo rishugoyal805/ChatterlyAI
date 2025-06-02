@@ -50,21 +50,21 @@ export default function AskDoubtPage() {
   }, [])
 
   // ✅ Fetch previous chat history
-  useEffect(() => {
-    const fetchHistory = async () => {
-      if (!userEmail) return
-      try {
-        const res = await axios.get(`https://askdemia1.onrender.com/chat/history/${userEmail}`)
-        if (res.data && res.data.messages) {
-          setMessages(res.data.messages)
-        }
-      } catch (err) {
-        console.error("Failed to fetch chat history:", err)
-      }
-    }
+  // useEffect(() => {
+  //   const fetchHistory = async () => {
+  //     if (!userEmail) return
+  //     try {
+  //       const res = await axios.get(`https://askdemia1.onrender.com/chat/history/${userEmail}`)
+  //       if (res.data && res.data.messages) {
+  //         setMessages(res.data.messages)
+  //       }
+  //     } catch (err) {
+  //       console.error("Failed to fetch chat history:", err)
+  //     }
+  //   }
 
-    fetchHistory()
-  }, [userEmail])
+  //   fetchHistory()
+  // }, [userEmail])
 
   useEffect(() => {
     const handleGlobalKeydown = (e) => {
