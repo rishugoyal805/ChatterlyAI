@@ -30,8 +30,13 @@ export async function POST() {
       convoId: convoResult.insertedId,
       owners: [user._id],
     });
+    // ✅ 4. Push chat ID into user's chats_arr
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      { $push: { chats_arr: chatResult.insertedId } }
+    );
 
-    // 4. Return the conversation ID to redirect user
+    // 5. Return the conversation ID to redirect user
     return NextResponse.json({ convoId: convoResult.insertedId.toString() });
   } catch (error) {
     console.error('Error creating new chat:', error);
