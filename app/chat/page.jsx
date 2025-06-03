@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm"
 import { FaCopy, FaWhatsapp, FaEnvelope } from "react-icons/fa";
 import { getSession } from "next-auth/react"
 import React from 'react';
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AskDoubtPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -27,6 +28,7 @@ export default function AskDoubtPage() {
   const inputRef = useRef(null)
   const socket = useRef(null);
   const router = useRouter()
+  const [updatedChatboxId, setUpdatedChatboxId] = useState(null);
   const handleCopy = (text) => navigator.clipboard.writeText(text);
   const sendToWhatsApp = (text) => window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
   const sendToGmail = (text) => {
@@ -106,8 +108,12 @@ export default function AskDoubtPage() {
           }
           return f;
         });
+        const sorted = updated.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
 
-        return updated.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+        setUpdatedChatboxId(message.chatboxId);
+        setTimeout(() => setUpdatedChatboxId(null), 800); // reset after animation
+
+        return sorted;
       });
     });
 
@@ -270,18 +276,24 @@ export default function AskDoubtPage() {
               <User className="w-5 h-5" />
               <span>Profile</span>
             </Link> */}
-            {friends.map((frnd, i) => (
-              <button
-                key={i}
-                onClick={() => handleFriendSelect(frnd)}
-                className={`w-full text-left px-4 py-2 rounded-xl transition-colors ${selectedFriend?.chatbox_id === frnd.chatbox_id
-                  ? "bg-purple-200 text-purple-800"
-                  : "hover:bg-gray-100 text-gray-700"
-                  }`}
-              >
-                <span className="block truncate max-w-full">{frnd.nickname || frnd.email}</span>
-              </button>
-            ))}
+            {/* {friends.map((frnd, i) => (
+          <button */}
+            <AnimatePresence>
+              {friends.map((frnd) => (
+                <button
+                  key={frnd.chatbox_id}
+                  onClick={() => handleFriendSelect(frnd)}
+                  className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
+                    ? "bg-purple-200 text-purple-800"
+                    : "hover:bg-gray-100 text-gray-700"
+                    } ${updatedChatboxId === frnd.chatbox_id ? "scale-[1.03] shadow-md" : ""}`}
+                >
+                  <span className="block truncate max-w-full">
+                    {frnd.nickname || frnd.email}
+                  </span>
+                </button>
+              ))}
+            </AnimatePresence>
           </nav>
         </div>
         <div className="absolute bottom-6 left-6 right-6">
