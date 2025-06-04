@@ -203,7 +203,7 @@
 //                 <BookOpen className="w-5 h-5 text-white" />
 //               </div>
 //               <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-//                 Askdemia
+//                CHARTERLY
 //               </span>
 //             </div>
 //             <nav className="space-y-2">
@@ -436,10 +436,44 @@
 // }
 import { Suspense } from "react";
 import AskDoubtClient from "./AskDoubtClient";
+import { Lightbulb, LayoutDashboard, MessageCircleMore} from "lucide-react"
+import Link from "next/link"
 
 export default function AskDoubtPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div>
+          <nav className="space-y-2">
+            <Link
+              href="/dashboard"
+              className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              <span>Dashboard</span>
+            </Link>
+            <Link
+              href="/ask-doubt"
+              className="flex items-center space-x-3 px-4 py-3 bg-purple-100 text-purple-700 rounded-xl"
+            >
+              <Lightbulb className="w-5 h-5" />
+              <span>Chatbot</span>
+            </Link>
+            <Link
+              href="/chat"
+              className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <MessageCircleMore className="w-5 h-5" />
+              <span>Chat with Friends</span>
+            </Link>
+            {/* <Link href="/profile" className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+              <User className="w-5 h-5" />
+              <span>Profile</span>
+            </Link> */}
+          </nav>
+        </div>
+      }
+    >
       <AskDoubtClient />
     </Suspense>
   );

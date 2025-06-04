@@ -30,7 +30,7 @@ export default function LandingPage() {
     {
       name: "Sarah Chen",
       role: "Computer Science Student",
-      content: "Askdemia transformed my study routine. The collaborative doubt-solving feature is incredible!",
+      content: "Chatterly transformed my study routine. The collaborative doubt-solving feature is incredible!",
       rating: 5,
     },
     {
@@ -65,7 +65,7 @@ export default function LandingPage() {
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Main Chatbot
+                Chatterly
               </span>
             </div>
 
@@ -122,20 +122,19 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto text-center">
           <div className="animate-fade-in-up">
             <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight">
-              Learn Smarter,
+               Lets chat with friends 
               <br />
-              Not Harder
+             and AI altogether
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Join thousands of students who are revolutionizing their learning experience with collaborative study
-              tools and expert guidance.
+              Join thousands of people who are revolutionizing their Working experience with collaborative AI assistance with friends.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 href="/signup"
                 className="group bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center"
               >
-                Start Learning Today
+                Start Today
                 <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
@@ -154,7 +153,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Why Choose Askdemia?
+              Why Choose Chatterly?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Discover the features that make learning engaging, collaborative, and effective.
@@ -182,7 +181,7 @@ export default function LandingPage() {
       <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-100 to-blue-100">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-16 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            What Students Say
+            What People Say
           </h2>
 
           <div className="relative">
@@ -225,32 +224,31 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-blue-400 rounded-lg flex items-center justify-center">
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
-                <span className="text-xl font-bold">Askdemia</span>
+                <span className="text-xl font-bold">Chatterly</span>
               </div>
               <p className="text-gray-300 mb-6 max-w-md">
-                Empowering students worldwide with collaborative learning tools and expert guidance for academic
-                success.
+                Empowering students worldwide with collaborative AI assistance and chat system with friends for better and more effective learning.
               </p>
               <div className="flex space-x-4">
                 <a
                   href="#"
                   className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
-                  <span className="sr-only">Facebook</span>
+                  <span className="sr-only">Github</span>
                   <div className="w-5 h-5 bg-white rounded-sm"></div>
                 </a>
                 <a
                   href="#"
                   className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
-                  <span className="sr-only">Twitter</span>
+                  <span className="sr-only">LinkedIn</span>
                   <div className="w-5 h-5 bg-white rounded-sm"></div>
                 </a>
                 <a
                   href="#"
                   className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors"
                 >
-                  <span className="sr-only">Instagram</span>
+                  <span className="sr-only">Email</span>
                   <div className="w-5 h-5 bg-white rounded-sm"></div>
                 </a>
               </div>
@@ -310,7 +308,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-300">
-            <p>&copy; 2024 Askdemia. All rights reserved.</p>
+            <p>&copy; 2024 Chatterly. All rights reserved.</p>
           </div>
         </div>
       </footer>
