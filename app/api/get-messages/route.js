@@ -1,4 +1,3 @@
-// /api/get-messages.js (or .ts)
 import { connectToDatabase } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -10,7 +9,7 @@ export async function POST(req) {
 
   const messages = await db.collection("frnd_msg")
     .find({ _id: { $in: objectIds } })
-    .sort({ timestamp: 1 }) // Optional: sort by time
+    .sort({ timestamp: 1 })
     .toArray();
 
   return Response.json({ messages });
