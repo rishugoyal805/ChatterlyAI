@@ -29,6 +29,7 @@ export async function POST() {
       name: 'New Chat',
       convoId: convoResult.insertedId,
       owners: [user._id],
+      priority: "normal",
     });
     // ✅ 4. Push chat ID into user's chats_arr
     await db.collection('users').updateOne(
