@@ -13,7 +13,7 @@ export async function GET() {
     }
 
     const { db } = await connectToDatabase();
-
+ 
     // 1. Find the user
     const user = await db
       .collection("users")
