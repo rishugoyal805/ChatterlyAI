@@ -16,7 +16,7 @@ export async function POST(req) {
       .updateOne(
         { _id: new ObjectId(chatId) },
         { $set: { priority: priority } }
-      );
+      ); 
 
     return NextResponse.json({ success: true });
   } catch (error) {
