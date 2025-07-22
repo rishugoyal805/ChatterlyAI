@@ -5,6 +5,15 @@ export async function middleware(request) {
   const jwtToken = request.cookies.get("auth_token")?.value;
   const nextAuthToken = request.cookies.get("next-auth.session-token")?.value;
 
+  // Add debugging for production
+  if (process.env.NODE_ENV === "production") {
+    console.log("Middleware Debug:", {
+      hasJwtToken: !!jwtToken,
+      hasNextAuthToken: !!nextAuthToken,
+      path: request.nextUrl.pathname,
+    });
+  }
+
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
   // 1️⃣ If you have your custom JWT
@@ -13,7 +22,11 @@ export async function middleware(request) {
       await jwtVerify(jwtToken, secret);
       return NextResponse.next();
     } catch (err) {
-      return NextResponse.redirect(new URL("/", request.url));
+      console.error("JWT verification failed:", err.message);
+      // Clear invalid token
+      const response = NextResponse.redirect(new URL("/", request.url));
+      response.cookies.delete("auth_token");
+      return response;
     }
   }
 
