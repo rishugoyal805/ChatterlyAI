@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import jwt from "jsonwebtoken";
 
 export async function middleware(request) {
   const jwtToken = request.cookies.get("auth_token")?.value;
@@ -14,12 +14,10 @@ export async function middleware(request) {
     });
   }
 
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-
   // 1️⃣ If you have your custom JWT
   if (jwtToken) {
     try {
-      await jwtVerify(jwtToken, secret);
+      jwt.verify(jwtToken, process.env.JWT_SECRET);
       return NextResponse.next();
     } catch (err) {
       console.error("JWT verification failed:", err.message);
