@@ -73,6 +73,10 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 7 * 24 * 60 * 60, // 7 days
+  },
   callbacks: {
     async signIn({ user }) {
       try {
@@ -118,7 +122,10 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      return "/dashboard"; // always redirect to dashboard
+      // Handle different deployment environments
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/dashboard`;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

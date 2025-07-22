@@ -47,7 +47,10 @@ export default function LoginPage() {
   }
   const handleGoogleLogin = () => {
     setIsGoogleLoading(true)
-    signIn("google", { callbackUrl: `${window.location.origin}/dashboard` });
+    const callbackUrl = process.env.NODE_ENV === 'production' 
+      ? `${window.location.origin}/dashboard`
+      : 'http://localhost:3000/dashboard';
+    signIn("google", { callbackUrl, redirect: true });
   }
 
   const handleChange = (e) => {
