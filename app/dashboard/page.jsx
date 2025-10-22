@@ -98,13 +98,13 @@ export default function Dashboard() {
               <MessageCircleMore className="w-5 h-5" />
               <span>Chat with Friends</span>
             </Link>
-            <Link
+            {/* <Link
               href="https://v0.dev/"
               className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <Sparkles className="w-5 h-5" />
               <span>Webapp Builder</span>
-            </Link>
+            </Link> */}
           </nav>
         </div>
 
