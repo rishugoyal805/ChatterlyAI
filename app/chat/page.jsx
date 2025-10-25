@@ -64,6 +64,9 @@ export default function AskDoubtPage() {
     window.open(gmailUrl, "_blank");
   };
 
+  const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+  const [newFriendInput, setNewFriendInput] = useState("");
+
   // ✅ Get email from localStorage
   useEffect(() => {
     const fetchSession = async () => {
@@ -216,11 +219,83 @@ export default function AskDoubtPage() {
     window.location.reload();
   };
 
-  const handleNewChat = async () => {
-    const searchValue = prompt(
-      "Enter your friend's email or nickname to start a new chat:"
-    );
+  // const handleNewChat = async () => {
+  //   const searchValue = prompt(
+  //     "Enter your friend's email or nickname to start a new chat:"
+  //   );
 
+  //   const userEmail = localStorage.getItem("email");
+  //   if (!searchValue || !userEmail) return;
+
+  //   const existingChat = friends.find(
+  //     (frnd) => frnd.email === searchValue || frnd.nickname === searchValue
+  //   );
+  //   if (existingChat) {
+  //     handleFriendSelect(existingChat);
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await fetch("/api/create-chatbox", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ userEmail, friendEmail: searchValue }),
+  //     });
+
+  //     const data = await res.json();
+
+  //     if (data.success) {
+  //       const newFriend = {
+  //         chatbox_id: data.chatbox._id,
+  //         email: data.friend.email,
+  //         nickname: data.friend.nickname,
+  //         lastModified: new Date().toISOString(),
+  //       };
+
+  //       // Add friend to user's frnd_arr
+  //       const response = await fetch("/api/add-friend", {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           userEmail,
+  //           friendEmail: newFriend.email,
+  //           chatboxId: newFriend.chatbox_id,
+  //         }),
+  //       });
+
+  //       const addFriendData = await response.json();
+
+  //       if (!response.ok || !addFriendData.success) {
+  //         alert(
+  //           addFriendData.message || "Something went wrong while adding friend."
+  //         );
+  //         return; // exit early if add-friend failed
+  //       }
+
+  //       setFriends((prev) => {
+  //         const updated = [...prev, newFriend];
+  //         return updated.sort(
+  //           (a, b) => new Date(b.lastModified) - new Date(a.lastModified)
+  //         );
+  //       });
+
+  //       handleFriendSelect(newFriend);
+  //     } else {
+  //       alert(data.message || "Failed to create chat.");
+  //     }
+  //   } catch (err) {
+  //     alert("Something went wrong.");
+  //   }
+  // };
+
+  // Open the modal
+  const openAddFriendModal = () => {
+    setIsAddFriendModalOpen(true);
+  };
+
+  // Handle form submission
+  const handleAddFriendSubmit = async () => {
+    const searchValue = newFriendInput.trim();
     const userEmail = localStorage.getItem("email");
     if (!searchValue || !userEmail) return;
 
@@ -229,6 +304,7 @@ export default function AskDoubtPage() {
     );
     if (existingChat) {
       handleFriendSelect(existingChat);
+      setIsAddFriendModalOpen(false);
       return;
     }
 
@@ -249,8 +325,7 @@ export default function AskDoubtPage() {
           lastModified: new Date().toISOString(),
         };
 
-        // Add friend to user's frnd_arr
-        const response = await fetch("/api/add-friend", {
+        await fetch("/api/add-friend", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -260,23 +335,15 @@ export default function AskDoubtPage() {
           }),
         });
 
-        const addFriendData = await response.json();
-
-        if (!response.ok || !addFriendData.success) {
-          alert(
-            addFriendData.message || "Something went wrong while adding friend."
-          );
-          return; // exit early if add-friend failed
-        }
-
-        setFriends((prev) => {
-          const updated = [...prev, newFriend];
-          return updated.sort(
+        setFriends((prev) =>
+          [...prev, newFriend].sort(
             (a, b) => new Date(b.lastModified) - new Date(a.lastModified)
-          );
-        });
+          )
+        );
 
         handleFriendSelect(newFriend);
+        setIsAddFriendModalOpen(false);
+        setNewFriendInput("");
       } else {
         alert(data.message || "Failed to create chat.");
       }
@@ -284,6 +351,7 @@ export default function AskDoubtPage() {
       alert("Something went wrong.");
     }
   };
+
 
   const handleFriendSelect = async (friend) => {
     setSelectedFriend(friend);
@@ -471,8 +539,14 @@ export default function AskDoubtPage() {
               <Sparkles className="w-5 h-5" />
               <span>Webapp Builder</span>
             </Link> */}
-            <button
+            {/* <button
               onClick={handleNewChat}
+              className="w-full text-left px-4 py-2 mb-2 bg-green-100 text-green-700 hover:bg-green-200 rounded-xl transition-colors"
+            >
+              ➕ New Friend Chat
+            </button> */}
+            <button
+              onClick={openAddFriendModal}
               className="w-full text-left px-4 py-2 mb-2 bg-green-100 text-green-700 hover:bg-green-200 rounded-xl transition-colors"
             >
               ➕ New Friend Chat
@@ -489,8 +563,8 @@ export default function AskDoubtPage() {
                   <button
                     onClick={() => handleFriendSelect(frnd)}
                     className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
-                        ? "bg-purple-200 text-purple-800"
-                        : "hover:bg-gray-100 text-gray-700"
+                      ? "bg-purple-200 text-purple-800"
+                      : "hover:bg-gray-100 text-gray-700"
                       } ${updatedChatboxId === frnd.chatbox_id
                         ? "scale-[1.03] shadow-md"
                         : ""
@@ -605,14 +679,14 @@ export default function AskDoubtPage() {
                 <div
                   key={idx}
                   className={`flex ${msg.senderEmail === userEmail
-                      ? "justify-end"
-                      : "justify-start"
+                    ? "justify-end"
+                    : "justify-start"
                     }`}
                 >
                   <div
                     className={`px-4 py-3 rounded-xl shadow-md max-w-[100vw] md:max-w-md ${msg.senderEmail === userEmail
-                        ? "bg-purple-100 text-right rounded-br-none"
-                        : "bg-blue-100 text-left rounded-bl-none self-start"
+                      ? "bg-purple-100 text-right rounded-br-none"
+                      : "bg-blue-100 text-left rounded-bl-none self-start"
                       }`}
                   >
                     <div className="text-xs font-semibold text-gray-600 mb-1">
@@ -860,8 +934,8 @@ export default function AskDoubtPage() {
                 <button
                   onClick={sendMessage}
                   className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full transition ${!input.trim()
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:opacity-90"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:opacity-90"
                     }`}
                 >
                   <Send className="w-4 h-4" />
@@ -871,6 +945,36 @@ export default function AskDoubtPage() {
           </div>
         </main>
       </div>
+      {isAddFriendModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-80">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800">
+              Add New Friend
+            </h2>
+            <input
+              type="text"
+              value={newFriendInput}
+              onChange={(e) => setNewFriendInput(e.target.value)}
+              placeholder="Enter friend's email or nickname"
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => setIsAddFriendModalOpen(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddFriendSubmit}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
