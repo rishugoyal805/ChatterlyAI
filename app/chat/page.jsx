@@ -64,7 +64,12 @@ export default function AskDoubtPage() {
     window.open(gmailUrl, "_blank");
   };
 
+  // ✅ For editing friend name inline
+  const [editingFriendId, setEditingFriendId] = useState(null);
+  const [editedFriendName, setEditedFriendName] = useState("");
+
   const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+  const [newFriendName, setNewFriendName] = useState("");
   const [newFriendInput, setNewFriendInput] = useState("");
 
   // ✅ Get email from localStorage
@@ -178,36 +183,56 @@ export default function AskDoubtPage() {
     };
   }, [chatboxId, userEmail]);
 
-  //editing the name of a chat
-  const handleEditAiChatName = async (chat) => {
-    const newName = prompt("Enter new chat name", chat.name);
-    if (!newName?.trim()) return;
-
-    await fetch("/api/edit-ai-chat-name", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId: chat._id, newName }),
-    });
-
-    window.location.reload();
-  };
-  // handling the deletion of an AI chat
-  const handleDeleteAiChat = async (chat) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this chat and all related data?"
-      )
-    )
+  // ✅ Function to handle save after editing friend name inline
+  const handleEditChatName = async (friendId) => {
+    if (!editedFriendName.trim()) {
+      alert("Please enter a valid name.");
       return;
+    }
 
-    await fetch("/api/delete-ai-chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId: chat._id, convoId: chat.convoId }),
-    });
+    try {
+      const userEmail = localStorage.getItem("email");
 
-    window.location.reload();
+      const res = await fetch("/api/edit-frnd-chat-name", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail,
+          chatboxId: friendId,
+          newName: editedFriendName.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setFriends((prev) =>
+          prev.map((frnd) =>
+            frnd.chatbox_id === friendId
+              ? { ...frnd, nickname: editedFriendName.trim() }
+              : frnd
+          )
+        );
+
+        if (selectedFriend?.chatbox_id === friendId) {
+          setSelectedFriend((prev) => ({
+            ...prev,
+            nickname: editedFriendName.trim(),
+          }));
+        }
+
+        // ✅ Reset editing mode
+        setEditingFriendId(null);
+        setEditedFriendName("");
+      } else {
+        alert(data.message || "Failed to update name.");
+      }
+    } catch (error) {
+      console.error("Error updating chat name:", error);
+      alert("Something went wrong while updating name.");
+    }
   };
+
   // handling the pinning of an AI chat
   const handlePinAiChat = async (chat) => {
     await fetch("/api/pin-ai-chat", {
@@ -295,12 +320,16 @@ export default function AskDoubtPage() {
 
   // Handle form submission
   const handleAddFriendSubmit = async () => {
-    const searchValue = newFriendInput.trim();
+    const friendEmail = newFriendInput.trim();
+    const friendName = newFriendName.trim();
     const userEmail = localStorage.getItem("email");
-    if (!searchValue || !userEmail) return;
+    if (!friendEmail || !userEmail || !friendName) {
+      alert("Please enter both friend's name and email.");
+      return;
+    }
 
     const existingChat = friends.find(
-      (frnd) => frnd.email === searchValue || frnd.nickname === searchValue
+      (frnd) => frnd.email === friendEmail || frnd.nickname === friendName
     );
     if (existingChat) {
       handleFriendSelect(existingChat);
@@ -312,7 +341,7 @@ export default function AskDoubtPage() {
       const res = await fetch("/api/create-chatbox", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userEmail, friendEmail: searchValue }),
+        body: JSON.stringify({ userEmail, friendEmail, friendName }),
       });
 
       const data = await res.json();
@@ -321,7 +350,7 @@ export default function AskDoubtPage() {
         const newFriend = {
           chatbox_id: data.chatbox._id,
           email: data.friend.email,
-          nickname: data.friend.nickname,
+          nickname: data.friendName,
           lastModified: new Date().toISOString(),
         };
 
@@ -330,6 +359,7 @@ export default function AskDoubtPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userEmail,
+            friendName: newFriend.nickname,
             friendEmail: newFriend.email,
             chatboxId: newFriend.chatbox_id,
           }),
@@ -560,21 +590,49 @@ export default function AskDoubtPage() {
             <AnimatePresence>
               {friends.map((frnd) => (
                 <div key={frnd.chatbox_id} className="relative group">
-                  <button
-                    onClick={() => handleFriendSelect(frnd)}
-                    className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
-                      ? "bg-purple-200 text-purple-800"
-                      : "hover:bg-gray-100 text-gray-700"
-                      } ${updatedChatboxId === frnd.chatbox_id
-                        ? "scale-[1.03] shadow-md"
-                        : ""
-                      }`}
-                  >
-                    <span className="block truncate max-w-full">
-                      {frnd.nickname || frnd.email}
-                    </span>
-                  </button>
-
+                  {editingFriendId === frnd.chatbox_id ? (
+                    // Inline editable mode
+                    <input
+                      type="text"
+                      value={editedFriendName}
+                      onChange={(e) => setEditedFriendName(e.target.value)}
+                      onBlur={() => {
+                        if (editedFriendName.trim() && editedFriendName !== frnd.nickname) {
+                          handleEditChatName(frnd.chatbox_id);
+                        }
+                        setEditingFriendId(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (editedFriendName.trim() && editedFriendName !== frnd.nickname) {
+                            handleEditChatName(frnd.chatbox_id);
+                          }
+                          setEditingFriendId(null);
+                        } else if (e.key === "Escape") {
+                          setEditingFriendId(null);
+                        }
+                      }}
+                      className={`w-full bg-white text-gray-900 border border-purple-300 focus:ring-2 focus:ring-purple-500 rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200`}
+                      autoFocus
+                    />
+                  ) : (
+                    <button
+                      onClick={() => handleFriendSelect(frnd)}
+                      onDoubleClick={() => {
+                        setEditingFriendId(frnd.chatbox_id);
+                        setEditedFriendName(frnd.nickname || "");
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
+                        ? "bg-purple-200 text-purple-800"
+                        : "hover:bg-gray-100 text-gray-700"
+                        } ${updatedChatboxId === frnd.chatbox_id ? "scale-[1.03] shadow-md" : ""}`}
+                    >
+                      <span className="block truncate max-w-full font-medium tracking-wide">
+                        {frnd.nickname || frnd.email}
+                      </span>
+                    </button>
+                  )}
                   {/* 3-dot menu trigger */}
                   <button
                     onClick={(e) => {
@@ -592,7 +650,11 @@ export default function AskDoubtPage() {
                   {menuOpenId === frnd.chatbox_id && (
                     <div className="absolute right-2 top-8 bg-white shadow-md rounded-md border z-10 w-40 text-sm overflow-hidden">
                       <button
-                        onClick={() => handleEditAiChatName(frnd)}
+                        onClick={() => {
+                          setEditingFriendId(frnd.chatbox_id);
+                          setEditedFriendName(frnd.nickname || "");
+                          setMenuOpenId(null);
+                        }}
                         className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-left"
                       >
                         <Edit size={14} /> Edit Name
@@ -692,7 +754,7 @@ export default function AskDoubtPage() {
                     <div className="text-xs font-semibold text-gray-600 mb-1">
                       {msg.senderEmail === userEmail
                         ? "You"
-                        : selectedFriend?.nickname || "Friend"}
+                        : selectedFriend?.name || selectedFriend?.nickname || selectedFriend?.email || "Friend"}
                     </div>
 
                     <div className="markdown-content text-sm text-gray-800 max-w-[90vw] md:max-w-md overflow-x-auto whitespace-pre-wrap break-words">
@@ -951,6 +1013,13 @@ export default function AskDoubtPage() {
             <h2 className="text-lg font-semibold mb-4 text-gray-800">
               Add New Friend
             </h2>
+            <input
+              type="text"
+              value={newFriendName}
+              onChange={(e) => setNewFriendName(e.target.value)}
+              placeholder="Enter friend's name"
+              className="w-full mb-3 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
             <input
               type="text"
               value={newFriendInput}
