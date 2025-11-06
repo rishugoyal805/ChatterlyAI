@@ -60,6 +60,9 @@ export default function AskDoubtClient() {
   const [error, setError] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [user_ai_chats, setUser_ai_chats] = useState([]);
+  const [editingChatId, setEditingChatId] = useState(null);
+  const [newChatName, setNewChatName] = useState("");
+
   const [showShare, setShowShare] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingText, setEditingText] = useState("");
@@ -94,6 +97,24 @@ export default function AskDoubtClient() {
   const [isPaused, setIsPaused] = useState(false);
   const utteranceRef = useRef(null);
 
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuOpenId(null);
+      }
+    }
+
+    if (menuOpenId) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpenId]);
+
   // ✅ Get email from localStorage
   useEffect(() => {
     const fetchSession = async () => {
@@ -112,6 +133,7 @@ export default function AskDoubtClient() {
 
     fetchSession();
   }, []);
+
   //fetchUserChats the chats for the user
   useEffect(() => {
     const fetchUserChats = async () => {
@@ -513,18 +535,39 @@ export default function AskDoubtClient() {
     console.log("deleted completely");
   };
   //editing the name of a chat
+  // ✅ Inline chat rename (no prompt, no reload)
   const handleEditAiChatName = async (chat) => {
-    const newName = prompt("Enter new chat name", chat.name);
-    if (!newName?.trim()) return;
+    const trimmed = newChatName?.trim();
+    if (!trimmed) {
+      setEditingChatId(null);
+      return;
+    }
 
     await fetch("/api/edit-ai-chat-name", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId: chat._id, newName }),
+      body: JSON.stringify({ chatId: chat._id, newName: trimmed }),
     });
 
-    window.location.reload();
+    // Update state instantly (no reload)
+    setUser_ai_chats((prev) =>
+      prev.map((c) => (c._id === chat._id ? { ...c, name: trimmed } : c))
+    );
+    setEditingChatId(null);
   };
+
+  // const handleEditAiChatName = async (chat) => {
+  //   const newName = prompt("Enter new chat name", chat.name);
+  //   if (!newName?.trim()) return;
+
+  //   await fetch("/api/edit-ai-chat-name", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ chatId: chat._id, newName }),
+  //   });
+
+  //   window.location.reload();
+  // };
   // handling the deletion of an AI chat
   const handleDeleteAiChat = async (chat) => {
     if (
@@ -811,18 +854,38 @@ export default function AskDoubtClient() {
                       // className="w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 relative hover:bg-gray-100"
                       className="relative group"
                     >
-                      <Link
-                        href={`/ask-doubt?convoId=${chat.convoId}`}
-                        onClick={() => setSelectedConvoId(chat.convoId)}
-                        className={`block text-sm px-4 py-2 rounded-lg transition-colors pr-8  ${
-                          selectedConvoId === chat.convoId
-                            ? "bg-purple-200 text-purple-800"
-                            : "hover:bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {chat.name || "Untitled Chat"}
-                      </Link>
-                      {/* Pin icon if priority is high */}
+                      {editingChatId === chat._id ? (
+                        <div className="px-4 py-[6px]">
+                          <input
+                            type="text"
+                            value={newChatName}
+                            onChange={(e) => setNewChatName(e.target.value)}
+                            autoFocus
+                            onKeyDown={async (e) => {
+                              if (e.key === "Enter")
+                                await handleEditAiChatName(chat);
+                              if (e.key === "Escape") setEditingChatId(null);
+                            }}
+                            className="text-sm bg-transparent border border-transparent border-b border-gray-300 w-[90%] mr-2
+                 focus:border-indigo-500 focus:ring-0 outline-none px-1 py-[2px] rounded-sm 
+                 transition-all duration-200"
+                            placeholder="Enter new name..."
+                          />
+                        </div>
+                      ) : (
+                        <Link
+                          href={`/ask-doubt?convoId=${chat.convoId}`}
+                          onClick={() => setSelectedConvoId(chat.convoId)}
+                          className={`block text-sm px-4 py-2 rounded-lg transition-colors pr-8 ${
+                            selectedConvoId === chat.convoId
+                              ? "bg-purple-200 text-purple-800"
+                              : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {chat.name || "Untitled Chat"}
+                        </Link>
+                      )}
+
                       {chat.priority === "high" && (
                         <div
                           className="absolute top-[25%] right-8 p-1 text-yellow-600"
@@ -846,13 +909,21 @@ export default function AskDoubtClient() {
 
                       {/* Dropdown menu */}
                       {menuOpenId === chat._id && (
-                        <div className="absolute right-2 top-8 bg-white shadow-md rounded-md border z-10 w-40 text-sm overflow-hidden">
+                        <div
+                          ref={menuRef}
+                          className="absolute right-2 top-8 bg-white shadow-md rounded-md border z-10 w-40 text-sm overflow-hidden"
+                        >
                           <button
-                            onClick={() => handleEditAiChatName(chat)}
+                            onClick={() => {
+                              setEditingChatId(chat._id);
+                              setNewChatName(chat.name || "");
+                              setMenuOpenId(null);
+                            }}
                             className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-left"
                           >
-                            <Edit size={14} /> Edit Name
+                            <Edit size={14} /> Rename
                           </button>
+
                           <button
                             onClick={() => handleDeleteAiChat(chat)}
                             className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-left text-red-600"
@@ -861,14 +932,14 @@ export default function AskDoubtClient() {
                           </button>
                           {chat.priority === "high" ? (
                             <button
-                              onClick={() => handleTogglePinAiChat(chat, false)} // unpin
+                              onClick={() => handleTogglePinAiChat(chat, false)}
                               className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-left"
                             >
                               <RiUnpinLine size={18} /> Unpin
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleTogglePinAiChat(chat, true)} // pin
+                              onClick={() => handleTogglePinAiChat(chat, true)}
                               className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-left"
                             >
                               <Pin size={14} /> Pin to Top
