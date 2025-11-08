@@ -105,9 +105,14 @@ export default function AskDoubtClient() {
 
   useEffect(() => {
     if (!userEmail) return;
+    socket.current = io("https://chatterly-backend-2.onrender.com"); // URL of socket server
 
-    socket.current = io("http://localhost:3002"); // URL of socket server
     socket.current.emit("join-user", userEmail);
+
+    // ✅ join chat room if convoId exists
+    if (convoId && convoId !== "Temporary Chat") {
+      socket.current.emit("join-chat", convoId);
+    }
 
     // When a chat is shared with you
     socket.current.on("chat-shared-update", ({ chatbox }) => {
@@ -118,10 +123,17 @@ export default function AskDoubtClient() {
       });
     });
 
+    // ✅ new message listener
+    socket.current.on("receive-message", (message, senderEmail) => {
+      if(senderEmail === userEmail) return;
+      console.log("📩 Real-time message received:", message);
+      setMessages((prev) => [...prev, message]);
+    });
+
     return () => {
       socket.current.disconnect();
     };
-  }, [userEmail]);
+  }, [userEmail, convoId]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -213,20 +225,98 @@ export default function AskDoubtClient() {
     fetchConversation();
   }, [convoId]);
 
+  // const sendMessage = async () => {
+  //   if (!input.trim()) return;
+
+  //   if (!userEmail) {
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       { role: "bot", text: "❗ Please login to use chat." },
+  //     ]);
+  //     return;
+  //   }
+
+  //   // 1️⃣ Push user message to UI
+  //   const userMessage = { role: "user", text: input };
+  //   setMessages((prev) => [...prev, userMessage]);
+  //   setInput("");
+  //   setLoading(true);
+  //   setError("");
+
+  //   try {
+  //     // 2️⃣ Save user message in DB
+  //     const userRes = await fetch("/api/Save-Message", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         senderName: userEmail,
+  //         text: input,
+  //         role: "user",
+  //       }),
+  //     });
+
+  //     const { insertedId: userMessageId } = await userRes.json();
+
+  //     // 3️⃣ Get AI response from your backend
+  //     const aiRes = await axios.post("https://askdemia1.onrender.com/chat", {
+  //       user_id: userEmail,
+  //       message: input,
+  //     });
+
+  //     const aiText = aiRes?.data?.response || "Unexpected response format.";
+  //     const aiMessage = { role: "bot", text: aiText };
+
+  //     // 4️⃣ Show AI response in chat
+  //     setMessages((prev) => [...prev, aiMessage]);
+
+  //     // 5️⃣ Save AI response in DB
+  //     const aiSave = await fetch("/api/Save-Message", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         senderName: "AI",
+  //         text: aiText,
+  //         role: "ai",
+  //       }),
+  //     });
+
+  //     const { insertedId: aiResponseId } = await aiSave.json();
+
+  //     // 6️⃣ Link both messages in conversation
+  //     await fetch("/api/add-message-pair", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         convoId,
+  //         userMessageId,
+  //         aiResponseId,
+  //       }),
+  //     });
+  //     await fetchUserChats(); // Refresh chat list to reflect any changes in chat names
+  //   } catch (err) {
+  //     console.error("Error sending message:", err);
+  //     setError("Something went wrong. Try again.");
+  //     setMessages((prev) => [
+  //       ...prev,
+  //       { role: "bot", text: "⚠️ Server error. Please try again later." },
+  //     ]);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
     if (!userEmail) {
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: "❗ Please login to use chat." },
-      ]);
+      setMessages((prev) => [...prev, { role: "bot", text: "❗ Please login" }]);
       return;
     }
 
     // 1️⃣ Push user message to UI
     const userMessage = { role: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
+    // setMessages((prev) => [...prev, userMessage]);
+    socket.current.emit("new-message", { convoId, message: userMessage, senderEmail: userEmail });
     setInput("");
     setLoading(true);
     setError("");
@@ -255,8 +345,8 @@ export default function AskDoubtClient() {
       const aiMessage = { role: "bot", text: aiText };
 
       // 4️⃣ Show AI response in chat
-      setMessages((prev) => [...prev, aiMessage]);
-
+      // setMessages((prev) => [...prev, aiMessage]);
+      socket.current.emit("new-message", { convoId, message: aiMessage, senderEmail: "AI" });
       // 5️⃣ Save AI response in DB
       const aiSave = await fetch("/api/Save-Message", {
         method: "POST",
@@ -1156,11 +1246,10 @@ export default function AskDoubtClient() {
                     }`}
                   >
                     <div
-                      className={`px-4 py-3 rounded-xl shadow-md break-words ${
-                        msg.role === "user"
-                          ? "bg-purple-100 text-right rounded-br-none self-end  max-w-[70%] sm:max-w-md"
-                          : "bg-blue-100 text-left rounded-bl-none self-start max-w-[90%] sm:max-w-2xl overflow-x-auto"
-                      }`}
+                      className={`px-4 py-3 rounded-xl shadow-md break-words ${msg.role === "user"
+                        ? "bg-purple-100 text-right rounded-br-none self-end  max-w-[70%] sm:max-w-md"
+                        : "bg-blue-100 text-left rounded-bl-none self-start max-w-[90%] sm:max-w-2xl overflow-x-auto"
+                        }`}
                     >
                       <div className="text-xs font-semibold mb-1">
                         {msg.role === "user" ? "You" : "Bot"}

@@ -18,7 +18,7 @@ export async function POST(req) {
     );
 
     // ✅ Tell socket server to emit update
-    await axios.post("http://localhost:3002/emit-chat-rename", {
+    await axios.post("https://chatterly-backend-2.onrender.com/emit-chat-rename", {
       chatId,
       newName,
     });
