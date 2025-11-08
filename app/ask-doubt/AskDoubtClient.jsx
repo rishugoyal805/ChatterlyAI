@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BookOpen, 
+  BookOpen,
   Lightbulb,
   Menu,
   X,
@@ -105,6 +105,26 @@ export default function AskDoubtClient() {
   const menuRef = useRef(null);
 
   useEffect(() => {
+    if (!userEmail) return;
+
+    socket.current = io("http://localhost:3002"); // URL of socket server
+    socket.current.emit("join-user", userEmail);
+
+    // When a chat is shared with you
+    socket.current.on("chat-shared-update", ({ chatbox }) => {
+      setUser_ai_chats((prev) => {
+        const exists = prev.some((chat) => chat._id === chatbox._id);
+        if (exists) return prev;
+        return [...prev, chatbox];
+      });
+    });
+
+    return () => {
+      socket.current.disconnect();
+    };
+  }, [userEmail]);
+
+  useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpenId(null);
@@ -140,62 +160,23 @@ export default function AskDoubtClient() {
   }, []);
 
   //fetchUserChats the chats for the user
-  useEffect(() => {
-    const fetchUserChats = async () => {
-      try {
-        const res = await fetch("/api/fetch-ai-chats");
-        const data = await res.json();
-        if (res.ok) {
-          setUser_ai_chats(data.chats); // or whatever state you use to render sidebar/chat list
-        } else {
-          console.error("Error loading chats:", data.message);
-        }
-      } catch (err) {
-        console.error("Fetch failed:", err);
+  const fetchUserChats = async () => {
+    try {
+      const res = await fetch("/api/fetch-ai-chats");
+      const data = await res.json();
+      if (res.ok) {
+        setUser_ai_chats(data.chats); // or whatever state you use to render sidebar/chat list
+      } else {
+        console.error("Error loading chats:", data.message);
       }
-    };
+    } catch (err) {
+      console.error("Fetch failed:", err);
+    }
+  };
 
+  useEffect(() => {
     fetchUserChats();
   }, []);
-
-  useEffect(() => {
-    if (!userEmail) return;
-
-    if (!socket.current) {
-      socket.current = io("https://chatterly-backend-8dwx.onrender.com", {
-        transports: ["websocket"],
-      });
-    }
-
-    socket.current.emit("join-room", convoId);
-
-    socket.current.on("receive-user-message", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
-
-    // Listen for bot message
-    socket.current.on("receive-bot-message", (aiMessage) => {
-      setMessages((prev) => [...prev, aiMessage]);
-      setLoading(false);
-    });
-
-    // Listen for errors
-    socket.current.on("error-message", (msg) => {
-      setMessages((prev) => [
-        ...prev,
-        { role: "bot", text: msg || "⚠️ Error occurred." },
-      ]);
-      setLoading(false);
-    });
-
-    return () => {
-      socket.current.off("receive-user-message");
-      socket.current.off("receive-bot-message");
-      socket.current.off("error-message");
-      socket.current?.disconnect();
-      socket.current = null;
-    };
-  }, [convoId, userEmail]);
 
   useEffect(() => {
     if (!convoId) return;
@@ -300,6 +281,7 @@ export default function AskDoubtClient() {
           aiResponseId,
         }),
       });
+      await fetchUserChats(); // Refresh chat list to reflect any changes in chat names
     } catch (err) {
       console.error("Error sending message:", err);
       setError("Something went wrong. Try again.");
@@ -312,31 +294,6 @@ export default function AskDoubtClient() {
     }
   };
 
-  // // Send message to socket server
-  // const sendMessage = async () => {
-  //   if (!input.trim()) return;
-
-  //   if (!userEmail) {
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       { role: "bot", text: "❗ Please login to use chat." },
-  //     ]);
-  //     return;
-  //   }
-
-  //   const userMessage = { role: "user", text: input };
-  //   setInput("");
-  //   setLoading(true);
-  //   setError("");
-
-  //   // 🚀 Emit to socket server, let it handle everything
-  //   socket.current.emit("send-ai-message", {
-  //     roomId: convoId,
-  //     senderName: userEmail,
-  //     text: input,
-  //     role: "user",
-  //   });
-  // };
   const handleNewChat = async () => {
     try {
       const res = await fetch("/api/create-new-chat", { method: "POST" });
@@ -843,9 +800,8 @@ export default function AskDoubtClient() {
         {/* Sidebar */}
         <div
           ref={sidebarRef}
-          className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-white/20 z-50 transform transition-transform duration-300 ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
+          className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-white/20 z-50 transform transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            } lg:translate-x-0`}
         >
           <div className="p-4">
             <div className="flex items-center justify-between mb-8">
@@ -931,11 +887,10 @@ export default function AskDoubtClient() {
                         <Link
                           href={`/ask-doubt?convoId=${chat.convoId}`}
                           onClick={() => setSelectedConvoId(chat.convoId)}
-                          className={`block text-sm px-4 py-2 rounded-lg transition-colors pr-[25%] truncate w-full relative ${
-                            selectedConvoId === chat.convoId
+                          className={`block text-sm px-4 py-2 rounded-lg transition-colors pr-[25%] truncate w-full relative ${selectedConvoId === chat.convoId
                               ? "bg-purple-200 text-purple-800"
                               : "hover:bg-gray-100 text-gray-700"
-                          }`}
+                            }`}
                           title={chat.name || "New Chat"} // optional: show full name on hover
                         >
                           {chat.name || "New Chat"}
@@ -1193,16 +1148,14 @@ export default function AskDoubtClient() {
                 {messages.map((msg, index) => (
                   <div
                     key={msg.id || index}
-                    className={`flex ${
-                      msg.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+                      }`}
                   >
                     <div
-                      className={`px-4 py-3 rounded-xl shadow-md break-words ${
-                        msg.role === "user"
+                      className={`px-4 py-3 rounded-xl shadow-md break-words ${msg.role === "user"
                           ? "bg-purple-100 text-right rounded-br-none self-end  max-w-[70%] sm:max-w-md"
                           : "bg-blue-100 text-left rounded-bl-none self-start max-w-[90%] sm:max-w-2xl overflow-x-auto"
-                      }`}
+                        }`}
                     >
                       <div className="text-xs font-semibold mb-1">
                         {msg.role === "user" ? "You" : "Bot"}
@@ -1276,8 +1229,8 @@ export default function AskDoubtClient() {
                                           {typeof children === "string"
                                             ? children
                                             : Array.isArray(children)
-                                            ? children.join("")
-                                            : ""}
+                                              ? children.join("")
+                                              : ""}
                                         </code>
                                       </pre>
                                       <div
@@ -1380,11 +1333,10 @@ export default function AskDoubtClient() {
                         </div>
                         {msg.text && (
                           <div
-                            className={`flex gap-4 items-center mt-2 text-xs text-gray-700 ${
-                              msg.role === "user"
+                            className={`flex gap-4 items-center mt-2 text-xs text-gray-700 ${msg.role === "user"
                                 ? "justify-end"
                                 : "justify-start"
-                            }`}
+                              }`}
                           >
                             {msg.role === "user" && (
                               <>
@@ -1423,8 +1375,8 @@ export default function AskDoubtClient() {
                                   isPaused
                                     ? "Resume speaking"
                                     : isSpeaking
-                                    ? "Pause speaking"
-                                    : "Play"
+                                      ? "Pause speaking"
+                                      : "Play"
                                 }
                                 className="flex items-center gap-1 text-green-600 hover:text-green-800 transition"
                               >
@@ -1441,8 +1393,8 @@ export default function AskDoubtClient() {
                                   {isPaused
                                     ? "Resume"
                                     : isSpeaking
-                                    ? "Pause"
-                                    : "Play"}
+                                      ? "Pause"
+                                      : "Play"}
                                 </span>
                                 {isSpeaking && (
                                   <button
@@ -1493,11 +1445,10 @@ export default function AskDoubtClient() {
                   />
                   <button
                     onClick={toggleListening}
-                    className={`p-2 rounded-xl border transition ${
-                      listening
+                    className={`p-2 rounded-xl border transition ${listening
                         ? "bg-red-500 text-white"
                         : "bg-white text-black"
-                    }`}
+                      }`}
                   >
                     {listening ? (
                       <MicOff className="w-5 h-5" />
