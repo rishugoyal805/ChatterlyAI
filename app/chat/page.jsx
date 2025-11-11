@@ -23,7 +23,7 @@ import {
   Mail,
   Sparkles,
 } from "lucide-react";
-
+import { TiPinOutline } from "react-icons/ti";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { io } from "socket.io-client";
@@ -193,7 +193,8 @@ export default function AskDoubtPage() {
       socket.current.on("chat-created", ({ chatbox }) => {
         console.log("📩 Chat created received:", chatbox);
         setFriends((prev) => {
-          if (prev.some((f) => f.chatbox_id === chatbox.chatbox_id)) return prev;
+          if (prev.some((f) => f.chatbox_id === chatbox.chatbox_id))
+            return prev;
 
           const updated = [...prev, { ...chatbox, pinned: false }];
           return updated.sort((a, b) => {
@@ -341,7 +342,9 @@ export default function AskDoubtPage() {
       });
 
       // ✅ Remove from UI immediately
-      setFriends((prev) => prev.filter((f) => f.chatbox_id !== friend.chatbox_id));
+      setFriends((prev) =>
+        prev.filter((f) => f.chatbox_id !== friend.chatbox_id)
+      );
 
       // If user is viewing this chat, clear it
       if (selectedFriend?.chatbox_id === friend.chatbox_id) {
@@ -404,7 +407,6 @@ export default function AskDoubtPage() {
       alert(error.message || "Something went wrong while pinning chat.");
     }
   };
-
 
   // const handleNewChat = async () => {
   //   const searchValue = prompt(
@@ -603,7 +605,7 @@ export default function AskDoubtPage() {
       // - Unpinned chats sorted among themselves by lastModified (newest first)
       const sorted = updated.sort((a, b) => {
         if (a.pinned && !b.pinned) return -1; // a is pinned → stays on top
-        if (!a.pinned && b.pinned) return 1;  // b is pinned → stays below pinned
+        if (!a.pinned && b.pinned) return 1; // b is pinned → stays below pinned
         // both pinned or both unpinned → sort by lastModified
         return new Date(b.lastModified) - new Date(a.lastModified);
       });
@@ -694,8 +696,9 @@ export default function AskDoubtPage() {
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 relative">
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-white/20 z-50 transform transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } lg:translate-x-0`}
+        className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-white/20 z-50 transform transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
@@ -777,7 +780,10 @@ export default function AskDoubtPage() {
                       value={editedFriendName}
                       onChange={(e) => setEditedFriendName(e.target.value)}
                       onBlur={() => {
-                        if (editedFriendName.trim() && editedFriendName !== frnd.nickname) {
+                        if (
+                          editedFriendName.trim() &&
+                          editedFriendName !== frnd.nickname
+                        ) {
                           handleEditChatName(frnd.chatbox_id);
                         }
                         setEditingFriendId(null);
@@ -785,7 +791,10 @@ export default function AskDoubtPage() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          if (editedFriendName.trim() && editedFriendName !== frnd.nickname) {
+                          if (
+                            editedFriendName.trim() &&
+                            editedFriendName !== frnd.nickname
+                          ) {
                             handleEditChatName(frnd.chatbox_id);
                           }
                           setEditingFriendId(null);
@@ -803,12 +812,17 @@ export default function AskDoubtPage() {
                         setEditingFriendId(frnd.chatbox_id);
                         setEditedFriendName(frnd.nickname || "");
                       }}
-                      className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
-                        ? "bg-purple-200 text-purple-800"
-                        : "hover:bg-gray-100 text-gray-700"
-                        } ${updatedChatboxId === frnd.chatbox_id ? "scale-[1.03] shadow-md" : ""}`}
+                      className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${
+                        selectedFriend?.chatbox_id === frnd.chatbox_id
+                          ? "bg-purple-200 text-purple-800"
+                          : "hover:bg-gray-100 text-gray-700"
+                      } ${
+                        updatedChatboxId === frnd.chatbox_id
+                          ? "scale-[1.03] shadow-md"
+                          : ""
+                      }`}
                     >
-                      <span className="block truncate max-w-[75%] flex items-center gap-1">
+                      <span className="block truncate max-w-[75%]  items-center gap-1">
                         <span>{frnd.nickname || frnd.email}</span>
                       </span>
                     </button>
@@ -822,7 +836,7 @@ export default function AskDoubtPage() {
                         title="Pinned Chat"
                         className="text-purple-600 text-sm translate-y-[1px]"
                       >
-                        📌
+                        <TiPinOutline size={16} className="text-yellow-600" />
                       </span>
                     )}
                     {/* 3-dot menu trigger */}
@@ -834,8 +848,11 @@ export default function AskDoubtPage() {
                           prev === frnd.chatbox_id ? null : frnd.chatbox_id
                         );
                       }}
-                      className={`p-1 rounded transition-colors ${menuOpenId === frnd.chatbox_id ? "bg-gray-200" : "hover:bg-gray-100"
-                        }`}
+                      className={`p-1 rounded transition-colors ${
+                        menuOpenId === frnd.chatbox_id
+                          ? "bg-gray-200"
+                          : "hover:bg-gray-100"
+                      }`}
                     >
                       <EllipsisVertical size={16} />
                     </button>
@@ -900,7 +917,6 @@ export default function AskDoubtPage() {
                       </motion.div>
                     )}
                   </AnimatePresence>
-
                 </div>
               ))}
             </AnimatePresence>
@@ -968,21 +984,26 @@ export default function AskDoubtPage() {
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex ${msg.senderEmail === userEmail
-                    ? "justify-end"
-                    : "justify-start"
-                    }`}
+                  className={`flex ${
+                    msg.senderEmail === userEmail
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
                   <div
-                    className={`px-4 py-3 rounded-xl shadow-md max-w-[100vw] md:max-w-md ${msg.senderEmail === userEmail
-                      ? "bg-purple-100 text-right rounded-br-none"
-                      : "bg-blue-100 text-left rounded-bl-none self-start"
-                      }`}
+                    className={`px-4 py-3 rounded-xl shadow-md max-w-[100vw] md:max-w-md ${
+                      msg.senderEmail === userEmail
+                        ? "bg-purple-100 text-right rounded-br-none"
+                        : "bg-blue-100 text-left rounded-bl-none self-start"
+                    }`}
                   >
                     <div className="text-xs font-semibold text-gray-600 mb-1">
                       {msg.senderEmail === userEmail
                         ? "You"
-                        : selectedFriend?.name || selectedFriend?.nickname || selectedFriend?.email || "Friend"}
+                        : selectedFriend?.name ||
+                          selectedFriend?.nickname ||
+                          selectedFriend?.email ||
+                          "Friend"}
                     </div>
 
                     <div className="markdown-content text-sm text-gray-800 max-w-[90vw] md:max-w-md overflow-x-auto whitespace-pre-wrap break-words">
@@ -1065,8 +1086,8 @@ export default function AskDoubtPage() {
                                       {typeof children === "string"
                                         ? children
                                         : Array.isArray(children)
-                                          ? children.join("")
-                                          : ""}
+                                        ? children.join("")
+                                        : ""}
                                     </code>
                                   </pre>
                                   <div
@@ -1223,10 +1244,11 @@ export default function AskDoubtPage() {
                 />
                 <button
                   onClick={sendMessage}
-                  className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full transition ${!input.trim()
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:opacity-90"
-                    }`}
+                  className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full transition ${
+                    !input.trim()
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:opacity-90"
+                  }`}
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -1250,7 +1272,7 @@ export default function AskDoubtPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
               className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-sm p-6 text-center"
             >
               <h2 className="text-lg font-semibold text-gray-800 mb-3">
