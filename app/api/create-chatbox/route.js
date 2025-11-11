@@ -6,7 +6,7 @@ export async function POST(req) {
   const { db } = await connectToDatabase();
   const { userEmail, friendEmail, friendName } = await req.json();
 
-  // Validate input
+  // Validate input 
   if (!userEmail || !friendEmail || !friendName) {
     return NextResponse.json({ success: false, message: "Enter friend name and email both" }, { status: 400 });
   }
