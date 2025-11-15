@@ -8,7 +8,7 @@ import {
   Lightbulb,
   Menu,
   X,
-  User,
+  User, 
   LogOut,
   ArrowLeft,
   Send,
