@@ -201,6 +201,136 @@ export default function AskDoubtClient() {
   useEffect(() => {
     fetchUserChats();
   }, []);
+
+  const handleSubmit = async () => {
+    const text = input.trim();
+    if (!text) return;
+
+    // very simple detection: starts with "/img" or "img:" etc
+    const isImgRequest =
+      text.startsWith("/img") ||
+      text.startsWith("img:") ||
+      text.startsWith("image:") ||
+      text.startsWith("/image");
+
+    if (isImgRequest) {
+      await generateImage(text.replace(/^\/?img:?/i, "").trim());
+    } else {
+      await sendMessage(text);
+    }
+
+    setInput("");
+  };
+
+  const generateImage = async (prompt) => {
+    if (!prompt.trim()) return;
+    if (!userEmail) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "bot", text: "❗ Please login,", isImg: false },
+      ]);
+      return;
+    }
+
+    // 1️⃣ Show user prompt in chat
+    const userMessage = { role: "user", text: prompt, isImg: false };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    socket.current.emit("send-message", {
+      roomId: convoId,
+      senderEmail: userEmail,
+      text: prompt,
+      isImg: false,
+    });
+
+    setLoading(true);
+
+    try {
+      // 2️⃣ Save user message in DB
+      const userRes = await fetch("/api/Save-Message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderName: userEmail,
+          text: prompt,
+          role: "user",
+          isImg: false,
+        }),
+      });
+
+      const { insertedId: userMessageId } = await userRes.json();
+
+      // 3️⃣ Call your HF image API
+      const imgRes = await fetch("/api/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const imgData = await imgRes.json();
+      const base64Image = imgData.image;
+
+      // 4️⃣ Add AI image message in UI
+      const aiMessage = {
+        role: "bot",
+        text: prompt, // keeping same format as your AI text
+        image: base64Image,
+        isImg: true,
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setLoading(false);
+      socket.current.emit("send-message", {
+        roomId: convoId,
+        senderEmail: "AI",
+        text: prompt,
+        image: base64Image,
+        isImg: true,
+      });
+
+      // 5️⃣ Save AI message in DB
+      const aiSave = await fetch("/api/Save-Message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderName: "AI",
+          text: prompt,
+          role: "ai",
+          isImg: true,
+          image: base64Image,
+        }),
+      });
+
+      const { insertedId: aiResponseId } = await aiSave.json();
+
+      // 6️⃣ Link user + AI message as a pair
+      await fetch("/api/add-message-pair", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          convoId,
+          userMessageId,
+          aiResponseId,
+        }),
+      });
+
+      await fetchUserChats();
+    } catch (err) {
+      console.error("IMAGE GEN ERROR:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: "⚠️ Failed to generate image. Try again.",
+          isImg: false,
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   useEffect(() => {
     if (!convoId) return;
 
@@ -635,7 +765,7 @@ export default function AskDoubtClient() {
     setEditingIndex(null);
     setEditingText("");
   };
-  
+
   // handling the deletion of a message
   const handleDeleteMessage = async (id) => {
     setMessages((prev) => {
