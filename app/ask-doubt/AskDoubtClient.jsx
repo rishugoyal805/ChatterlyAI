@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  BookOpen,
+  BookOpen, 
   Lightbulb,
   Menu,
   X,
