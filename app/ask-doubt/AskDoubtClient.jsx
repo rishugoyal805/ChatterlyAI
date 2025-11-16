@@ -1693,7 +1693,7 @@ export default function AskDoubtClient() {
                         handleSubmit();
                       }
                     }}
-                    placeholder="Type or speak your message..."
+                    placeholder="Type or speak your message. Use /img at the start to generate images."
                     rows={2}
                     className="flex-1 px-4 py-2 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
