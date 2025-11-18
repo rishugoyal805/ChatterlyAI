@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   BookOpen,
-  Lightbulb, 
+  Lightbulb,
   Menu,
   X,
   User,
@@ -421,11 +421,19 @@ export default function AskDoubtClient() {
 
       const { insertedId: userMessageId } = await userRes.json();
 
-      // 3️⃣ Get AI response from your backend
-      const aiRes = await axios.post("https://chatterly-agentic.onrender.com/chat", {
-        user_id: userEmail,
-        message: input,
-      });
+      // // 3️⃣ Get AI response from your backend
+      // const aiRes = await axios.post("https://chatterly-agentic.onrender.com/chat", {
+      //   user_id: userEmail,
+      //   message: input,
+      // });
+      const aiRes = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`,
+        {
+          user_id: userEmail,
+          message: input,
+        }
+      );
+
       console.log("AI RESPONSE:", aiRes);
       const aiText = aiRes?.data?.response || "Unexpected response format.";
       const aiMessage = { role: "bot", text: aiText };
@@ -623,7 +631,7 @@ export default function AskDoubtClient() {
       const { insertedId: userMessageId } = await userRes.json();
 
       // 🔹 Fetch new AI response
-      const aiRes = await axios.post(process.env.AGENTIC_BACKEND + "/chat", {
+      const aiRes = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`, {
         user_id: userEmail,
         message: text,
       });
