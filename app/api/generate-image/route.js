@@ -7,7 +7,7 @@
 //   try {
 //     const { prompt } = await req.json();
 //     if (!prompt) {
-//       return new Response(JSON.stringify({ error: "No prompt provided" }), {
+//       return new Response(JSON.stringify({ error: "No prompt provided" }), { 
 //         status: 400,
 //       });
 //     }
