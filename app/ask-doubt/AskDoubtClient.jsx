@@ -1395,8 +1395,8 @@ export default function AskDoubtClient() {
                     <div
                       className={`px-4 py-3 rounded-xl shadow-md break-words ${
                         msg.role === "user"
-                          ? "bg-purple-100 text-right rounded-br-none self-end  max-w-[70%] sm:max-w-md"
-                          : "bg-blue-100 text-left rounded-bl-none self-start max-w-[90%] sm:max-w-2xl overflow-x-auto"
+                          ? "bg-purple-100 text-pretty rounded-br-none max-w-[70%] sm:max-w-md user-markdown"
+                          : "bg-blue-100 text-left rounded-bl-none max-w-[90%] sm:max-w-2xl overflow-x-auto"
                       }`}
                     >
                       <div className="text-xs font-semibold mb-1">
