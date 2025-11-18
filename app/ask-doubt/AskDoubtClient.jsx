@@ -136,12 +136,17 @@ export default function AskDoubtClient() {
     // });
     socket.current.on(
       "receive-message",
-      ({ chatboxId, senderEmail, text, imageUrl, isImg }) => {
-        const role = senderEmail === "AI" ? "bot" : "user";
+      ({ chatboxId, senderEmail, text, isImg, imageUrl }) => {
+        if (!text?.trim()) return;
 
         setMessages((prev) => [
           ...prev,
-          isImg ? { role, image: imageUrl, isImg: true, text } : { role, text },
+          {
+            role: senderEmail === "AI" ? "bot" : "user",
+            text,
+            isImg: !!isImg,
+            imageUrl: isImg ? imageUrl : null,
+          },
         ]);
       }
     );
@@ -258,6 +263,7 @@ export default function AskDoubtClient() {
       senderEmail: userEmail,
       text: prompt,
       isImg: false,
+      imageUrl: null,
     });
 
     setLoading(true);
@@ -413,6 +419,8 @@ export default function AskDoubtClient() {
       roomId: convoId,
       senderEmail: userEmail,
       text: input,
+      isImg: false,
+      imageUrl: null,
     });
     setInput("");
     setLoading(true);
@@ -427,6 +435,8 @@ export default function AskDoubtClient() {
           senderName: userEmail,
           text: input,
           role: "user",
+          isImg: false,
+          imageUrl: null,
         }),
       });
 
@@ -455,6 +465,8 @@ export default function AskDoubtClient() {
         roomId: convoId,
         senderEmail: "AI",
         text: aiText,
+        isImg: false,
+        imageUrl: null,
       });
       setLoading(false);
       // 5️⃣ Save AI response in DB
@@ -465,6 +477,8 @@ export default function AskDoubtClient() {
           senderName: "AI",
           text: aiText,
           role: "ai",
+          isImg: false,
+          imageUrl: null,
         }),
       });
 
