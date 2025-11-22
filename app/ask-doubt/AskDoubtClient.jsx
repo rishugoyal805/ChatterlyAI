@@ -356,6 +356,7 @@ export default function AskDoubtClient() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (!convoId) return;
 
@@ -608,6 +609,18 @@ export default function AskDoubtClient() {
       ]);
       return;
     }
+    // ----------------------------------------------------
+    // 0️⃣ Detect if this edit is an IMAGE request
+    // ----------------------------------------------------
+    const isImgRequest =
+      text.startsWith("/img") ||
+      text.startsWith("img:") ||
+      text.startsWith("image:") ||
+      text.startsWith("/image");
+
+    const cleanPrompt = isImgRequest
+      ? text.replace(/^\/?img:?/i, "").trim()
+      : text.trim();
 
     // 1️⃣ Optimistically remove all messages below the edited one
 
@@ -618,13 +631,20 @@ export default function AskDoubtClient() {
     setMessages((prev) => prev.slice(0, index + 1));
 
     // 2️⃣ Replace the edited user message in position
-    const updatedUserMsg = { id: editingIndex, role: "user", text };
+    const updatedUserMsg = {
+      id: editingIndex,
+      role: "user",
+      text: cleanPrompt,
+      isImg: false,
+    };
     setMessages((prev) => [...prev.slice(0, index), updatedUserMsg]);
     // 3️⃣ Broadcast
     socket.current.emit("send-message", {
       roomId: convoId,
       senderEmail: userEmail,
       text,
+      isImg: false,
+      imageUrl: null,
     });
 
     setInput("");
@@ -648,12 +668,75 @@ export default function AskDoubtClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           senderName: userEmail,
-          text,
+          text: cleanPrompt,
           role: "user",
+          isImg: false,
+          imageUrl: null,
         }),
       });
 
       const { insertedId: userMessageId } = await userRes.json();
+
+      // ----------------------------------------------------
+      // 🚀 4️⃣ If IMAGE request → run the EXACT same flow as generateImage()
+      // ----------------------------------------------------
+      if (isImgRequest) {
+        // Call your existing API
+        const imgRes = await fetch("/api/generate-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: cleanPrompt }),
+        });
+
+        const imgData = await imgRes.json();
+        const base64Image = imgData.image;
+
+        // Save AI in DB (Cloudinary upload included)
+        const aiSave = await fetch("/api/Save-Message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            senderName: "AI",
+            text: cleanPrompt,
+            role: "ai",
+            isImg: true,
+            image: base64Image,
+          }),
+        });
+
+        const { insertedId: aiResponseId, imageUrl } = await aiSave.json();
+
+        const aiMessage = {
+          role: "bot",
+          text: cleanPrompt,
+          imageUrl,
+          isImg: true,
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+
+        socket.current.emit("send-message", {
+          roomId: convoId,
+          senderEmail: "AI",
+          text: cleanPrompt,
+          imageUrl,
+          isImg: true,
+        });
+
+        // pair messages
+        await fetch("/api/add-message-pair", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            convoId,
+            userMessageId,
+            aiResponseId,
+          }),
+        });
+
+        setLoading(false);
+        return; // STOP → do not run text chat logic
+      }
 
       // 🔹 Fetch new AI response
       const aiRes = await axios.post(
