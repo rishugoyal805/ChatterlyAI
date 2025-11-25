@@ -1,17 +1,29 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { ChevronRight, BookOpen, Lightbulb, Users, MessageCircle, Star, Menu, X, Github, Linkedin, Mail } from "lucide-react"
-import { FiGithub, FiLinkedin  } from "react-icons/fi";
+import { useState, useEffect } from "react";
+import {
+  ChevronRight,
+  BookOpen,
+  Lightbulb,
+  Users,
+  MessageCircle,
+  Star,
+  Menu,
+  X,
+  Github,
+  Linkedin,
+  Mail,
+} from "lucide-react";
+import { FiGithub, FiLinkedin } from "react-icons/fi";
 import { RiImageAiFill } from "react-icons/ri";
-import Link from "next/link"
+import Link from "next/link";
 
 export default function LandingPage() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [currentTestimonial, setCurrentTestimonial] = useState(0)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   const features = [
-    { 
+    {
       icon: Lightbulb,
       title: "Better Responses",
       description: "Uses AI Agents for refining and giving better results",
@@ -19,7 +31,8 @@ export default function LandingPage() {
     {
       icon: Users,
       title: "Collaborative sessions",
-      description: "Many People can work on same chat when shared by admin like Google Docs",
+      description:
+        "Many People can work on same chat when shared by admin like Google Docs",
     },
     {
       icon: MessageCircle,
@@ -31,35 +44,38 @@ export default function LandingPage() {
       title: "Image Generation",
       description: "Generate images using AI within this webapp",
     },
-  ]
+  ];
 
   const testimonials = [
     {
       name: "Sarah Chen",
       role: "Computer Science Student",
-      content: "ChatterlyAI transformed my study routine. The collaborative doubt-solving feature is incredible!",
+      content:
+        "ChatterlyAI transformed my study routine. The collaborative doubt-solving feature is incredible!",
       rating: 5,
     },
     {
       name: "Alex Rodriguez",
       role: "Engineering Student",
-      content: "The organized notes and resources saved me countless hours during exam preparation.",
+      content:
+        "The organized notes and resources saved me countless hours during exam preparation.",
       rating: 5,
     },
     {
       name: "Priya Sharma",
       role: "Medical Student",
-      content: "Best educational platform I've used. The community support is amazing!",
+      content:
+        "Best educational platform I've used. The community support is amazing!",
       rating: 5,
     },
-  ]
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
+      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100">
@@ -77,13 +93,22 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-purple-600 transition-colors">
+              <a
+                href="#features"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+              >
                 Features
               </a>
-              <a href="#testimonials" className="text-gray-700 hover:text-purple-600 transition-colors">
+              <a
+                href="#testimonials"
+                className="text-gray-700 hover:text-purple-600 transition-colors"
+              >
                 Testimonials
               </a>
-              <Link href="/login" className="text-purple-600 hover:text-purple-700 transition-colors">
+              <Link
+                href="/login"
+                className="text-purple-600 hover:text-purple-700 transition-colors"
+              >
                 Login
               </Link>
               <Link
@@ -94,8 +119,15 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            <button
+              className="md:hidden"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -104,10 +136,16 @@ export default function LandingPage() {
         {isMenuOpen && (
           <div className="md:hidden bg-white/90 backdrop-blur-md border-t border-white/20">
             <div className="px-4 py-4 space-y-4">
-              <a href="#features" className="block text-gray-700 hover:text-purple-600">
+              <a
+                href="#features"
+                className="block text-gray-700 hover:text-purple-600"
+              >
                 Features
               </a>
-              <a href="#testimonials" className="block text-gray-700 hover:text-purple-600">
+              <a
+                href="#testimonials"
+                className="block text-gray-700 hover:text-purple-600"
+              >
                 Testimonials
               </a>
               <Link href="/login" className="block text-purple-600">
@@ -134,7 +172,12 @@ export default function LandingPage() {
               and AI altogether
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Join thousands of people who are revolutionizing their Working experience with collaborative AI assistance with friends.
+              This is a student-built AI Project. No personal information is stored
+              or shared.
+            </p>
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Join thousands of people who are revolutionizing their Working
+              experience with collaborative AI assistance with friends.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
@@ -163,7 +206,8 @@ export default function LandingPage() {
               Why Choose ChatterlyAI?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Discover the features that make learning engaging, collaborative, and effective.
+              Discover the features that make learning engaging, collaborative,
+              and effective.
             </p>
           </div>
 
@@ -176,8 +220,12 @@ export default function LandingPage() {
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <feature.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 text-gray-800">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className="text-2xl font-bold mb-4 text-gray-800">
+                  {feature.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {feature.description}
+                </p>
               </div>
             ))}
           </div>
@@ -185,7 +233,10 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-100 to-blue-100">
+      <section
+        id="testimonials"
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-100 to-blue-100"
+      >
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-16 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             What People Say
@@ -194,16 +245,25 @@ export default function LandingPage() {
           <div className="relative">
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 md:p-12 border border-white/20 shadow-xl">
               <div className="flex justify-center mb-6">
-                {[...Array(testimonials[currentTestimonial].rating)].map((_, i) => (
-                  <Star key={i} className="w-6 h-6 text-yellow-400 fill-current" />
-                ))}
+                {[...Array(testimonials[currentTestimonial].rating)].map(
+                  (_, i) => (
+                    <Star
+                      key={i}
+                      className="w-6 h-6 text-yellow-400 fill-current"
+                    />
+                  )
+                )}
               </div>
               <blockquote className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
                 "{testimonials[currentTestimonial].content}"
               </blockquote>
               <div>
-                <div className="font-bold text-lg text-gray-800">{testimonials[currentTestimonial].name}</div>
-                <div className="text-purple-600">{testimonials[currentTestimonial].role}</div>
+                <div className="font-bold text-lg text-gray-800">
+                  {testimonials[currentTestimonial].name}
+                </div>
+                <div className="text-purple-600">
+                  {testimonials[currentTestimonial].role}
+                </div>
               </div>
             </div>
 
@@ -212,8 +272,11 @@ export default function LandingPage() {
                 <button
                   key={index}
                   onClick={() => setCurrentTestimonial(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentTestimonial ? "bg-purple-600 scale-125" : "bg-purple-200 hover:bg-purple-400"
-                    }`}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === currentTestimonial
+                      ? "bg-purple-600 scale-125"
+                      : "bg-purple-200 hover:bg-purple-400"
+                  }`}
                 />
               ))}
             </div>
@@ -329,7 +392,9 @@ export default function LandingPage() {
                 <span className="text-xl font-bold">ChatterlyAI</span>
               </div>
               <p className="text-gray-300 mb-6 max-w-md">
-                Empowering students worldwide with collaborative AI assistance and chat system with friends for better and more effective learning.
+                Empowering students worldwide with collaborative AI assistance
+                and chat system with friends for better and more effective
+                learning.
               </p>
               <div className="text-sm text-gray-400 space-y-1">
                 <p className="text-white font-semibold mb-2">Made by:</p>
@@ -362,7 +427,8 @@ export default function LandingPage() {
                         LinkedIn
                       </a>
                       <a
-                        href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=swayamsam2005@gmail.com" target="_blank"
+                        href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=swayamsam2005@gmail.com"
+                        target="_blank"
                         className="flex items-center hover:text-white transition-colors"
                       >
                         <Mail className="w-4 h-4 mr-1" />
@@ -400,7 +466,8 @@ export default function LandingPage() {
                         LinkedIn
                       </a>
                       <a
-                        href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=rishugoyal6800@gmail.com" target="_blank"
+                        href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=rishugoyal6800@gmail.com"
+                        target="_blank"
                         className="flex items-center hover:text-white transition-colors"
                       >
                         <Mail className="w-4 h-4 mr-1" />
@@ -409,29 +476,54 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-
               </div>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
               <ul className="space-y-2">
-                <li><a href="#testimonials" className="text-gray-300 hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a></li>
+                <li>
+                  <a
+                    href="/about"
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#features"
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
+                    Features
+                  </a>
+                </li>
                 {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Pricing</a></li> */}
                 {/* <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact</a></li> */}
               </ul>
             </div>
 
-            {/* <div>
+            <div>
               <h3 className="text-lg font-semibold mb-4">Support</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                <li>
+                  <a
+                    href="/privacy-policy"
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/terms"
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
+                    Terms of Service
+                  </a>
+                </li>
               </ul>
-            </div> */}
+            </div>
           </div>
 
           <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-300">
@@ -440,5 +532,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
