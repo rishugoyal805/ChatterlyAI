@@ -71,6 +71,17 @@ export default function LandingPage() {
   ];
 
   useEffect(() => {
+    void Promise.all([
+      fetch("https://chatterly-backend-8dwx.onrender.com/health", {
+        cache: "no-cache",
+      }),
+      fetch("https://chatterly-agentic-d4ai.onrender.com/health", {
+        cache: "no-cache",
+      }),
+    ]).catch(console.error);
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 4000);
@@ -172,8 +183,8 @@ export default function LandingPage() {
               and AI altogether
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              This is a student-built AI Project. No personal information is stored
-              or shared.
+              This is a student-built AI Project. No personal information is
+              stored or shared.
             </p>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
               Join thousands of people who are revolutionizing their Working
