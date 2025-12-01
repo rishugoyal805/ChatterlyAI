@@ -1050,6 +1050,7 @@ export default function AskDoubtClient() {
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isSidebarOpen]);
+
   return (
     <Suspense
       fallback={
