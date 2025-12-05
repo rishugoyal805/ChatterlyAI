@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import { useLayoutEffect, Suspense } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
+import { motion, AnimatePresence } from "framer-motion";
 import remarkGfm from "remark-gfm";
 import {
   FaCopy,
@@ -907,13 +908,14 @@ export default function AskDoubtClient() {
           router.replace(`/ask-doubt?convoId=${updated[index - 1].convoId}`);
 
           // CASE 3: No chats left → create a new one
-        } else {
-          handleNewChat();
         }
+        //removed this because there were 2 calls to handleNewChat
+        //  else {
+        //   handleNewChat();
+        // }
       }
       return updated;
     });
-    
 
     try {
       const res = await fetch("/api/delete-ai-chat", {
@@ -1172,38 +1174,38 @@ export default function AskDoubtClient() {
                       // className="w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 relative hover:bg-gray-100"
                       className="relative group"
                     >
-                      {editingChatId === chat._id ? (
-                        <div className="px-4 py-[6px]">
-                          <input
-                            type="text"
-                            value={newChatName}
-                            onChange={(e) => setNewChatName(e.target.value)}
-                            autoFocus
-                            onKeyDown={async (e) => {
-                              if (e.key === "Enter")
-                                await handleEditAiChatName(chat);
-                              if (e.key === "Escape") setEditingChatId(null);
-                            }}
-                            className="text-sm bg-transparent border border-transparent border-b border-gray-300 w-[90%] mr-2
-                     focus:border-indigo-500 focus:ring-0 outline-none px-1 py-[2px] rounded-sm 
-                       transition-all duration-200"
-                            placeholder="Enter new name..."
-                          />
-                        </div>
-                      ) : (
-                        <Link
-                          href={`/ask-doubt?convoId=${chat.convoId}`}
-                          onClick={() => setSelectedConvoId(chat.convoId)}
-                          className={`block text-sm px-4 py-2 rounded-lg transition-colors pr-[25%] truncate w-full relative ${
-                            selectedConvoId === chat.convoId
-                              ? "bg-purple-200 text-purple-800"
-                              : "hover:bg-gray-100 text-gray-700"
-                          }`}
-                          title={chat.name || "New Chat"} // optional: show full name on hover
-                        >
-                          {chat.name || "New Chat"}
-                        </Link>
-                      )}
+                      <AnimatePresence>
+                        {editingChatId === chat._id ? (
+                          <div className="px-4 py-[6px]">
+                            <input
+                              type="text"
+                              value={newChatName}
+                              onChange={(e) => setNewChatName(e.target.value)}
+                              autoFocus
+                              onKeyDown={async (e) => {
+                                if (e.key === "Enter")
+                                  await handleEditAiChatName(chat);
+                                if (e.key === "Escape") setEditingChatId(null);
+                              }}
+                              className="max-w-[73%] bg-white text-gray-900 border border-purple-10 focus:ring-2 focus:ring-purple-300 rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200"
+                              placeholder="Enter new name..."
+                            />
+                          </div>
+                        ) : (
+                          <Link
+                            href={`/ask-doubt?convoId=${chat.convoId}`}
+                            onClick={() => setSelectedConvoId(chat.convoId)}
+                            className={`block text-sm px-4 py-2 rounded-lg transition-colors pr-[25%] truncate w-full relative ${
+                              selectedConvoId === chat.convoId
+                                ? "bg-purple-200 text-purple-800"
+                                : "hover:bg-gray-100 text-gray-700"
+                            }`}
+                            title={chat.name || "New Chat"} // optional: show full name on hover
+                          >
+                            {chat.name || "New Chat"}
+                          </Link>
+                        )}
+                      </AnimatePresence>
 
                       {chat.priority === "high" && (
                         <div
@@ -1287,7 +1289,7 @@ export default function AskDoubtClient() {
             </button>
           </div>
         </div>
-        {chatToDelete && (
+        {/* {chatToDelete && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999]">
             <div className="bg-white rounded-lg shadow-lg p-6 w-[90%] max-w-sm">
               <h2 className="text-lg font-semibold text-gray-800 mb-3">
@@ -1315,7 +1317,57 @@ export default function AskDoubtClient() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
+        <AnimatePresence>
+          {chatToDelete && (
+            <motion.div
+              key="deleteConfirmAi"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[999]"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="bg-white rounded-2xl shadow-2xl w-[90%] max-w-sm p-6 text-center"
+              >
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">
+                  Delete Chat?
+                </h2>
+
+                <p className="text-gray-500 text-sm mb-6">
+                  This will permanently delete the chat and all related data.
+                </p>
+
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={() => setChatToDelete(null)}
+                    className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 
+                       text-gray-800 font-medium transition"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      handleDeleteAiChat(chatToDelete);
+                      setChatToDelete(null);
+                    }}
+                    className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 
+                       text-white font-medium transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Main Section */}
         <div className="flex flex-col flex-1 lg:ml-64">
           {/* Header */}
