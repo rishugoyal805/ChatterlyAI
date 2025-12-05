@@ -220,7 +220,7 @@ export async function POST(req) {
       try {
         try {
           renameRes = await axios.post(
-            process.env.AGENTIC_BACKEND + "/chat",
+            process.env.NEXT_PUBLIC_BACKEND_URL + "/chat",
             {
               user_id: "Name Maker",
               message: summaryInput,
@@ -234,7 +234,7 @@ export async function POST(req) {
             console.warn("ECONNRESET, retrying in 2s...");
             await new Promise((res) => setTimeout(res, 2000));
             renameRes = await axios.post(
-              process.env.AGENTIC_BACKEND + "/chat",
+              process.env.NEXT_PUBLIC_BACKEND_URL + "/chat",
               {
                 user_id: "Name Maker",
                 message: summaryInput,

@@ -886,8 +886,34 @@ export default function AskDoubtClient() {
   // handling the deletion of an AI chat
   const handleDeleteAiChat = async (chat) => {
     // Optimistic UI update
-    setUser_ai_chats((prev) => prev.filter((c) => c._id !== chat._id));
+    // setUser_ai_chats((prev) => prev.filter((c) => c._id !== chat._id));
     setMenuOpenId(null);
+    setUser_ai_chats((prev) => {
+      const index = prev.findIndex((c) => c._id === chat._id);
+      const updated = prev.filter((c) => c._id !== chat._id);
+
+      // 🔥 If user is deleting the currently open chat
+      if (selectedConvoId === chat.convoId) {
+        setMessages([]);
+
+        // CASE 1: There is a next chat → go to it
+        if (updated[index]) {
+          setSelectedConvoId(updated[index].convoId);
+          router.replace(`/ask-doubt?convoId=${updated[index].convoId}`);
+
+          // CASE 2: No next chat, but there is a previous one
+        } else if (updated[index - 1]) {
+          setSelectedConvoId(updated[index - 1].convoId);
+          router.replace(`/ask-doubt?convoId=${updated[index - 1].convoId}`);
+
+          // CASE 3: No chats left → create a new one
+        } else {
+          handleNewChat();
+        }
+      }
+      return updated;
+    });
+    
 
     try {
       const res = await fetch("/api/delete-ai-chat", {
