@@ -194,7 +194,10 @@ export default function AskDoubtClient() {
         ...chat,
         ownersCount: chat.ownersCount ?? 0, // fallback if missing
       }));
-
+      if (chats.length === 0) {
+        handleNewChat();
+        return; // stop; nothing else to do
+      }
       setUser_ai_chats(chats);
       // 🔥 Redirect to latest chat if no convoId is in URL
       if ((!convoId || convoId === "Temporary Chat") && chats.length > 0) {
