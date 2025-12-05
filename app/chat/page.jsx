@@ -207,23 +207,45 @@ function ChatPageInner() {
       socket.current.emit("join-room", userEmail);
 
       // ✅ Listen globally once
-      socket.current.on("chat-created", ({ chatbox }) => {
-        console.log("📩 Chat created received:", chatbox);
-        setFriends((prev) => {
-          if (prev.some((f) => f.chatbox_id === chatbox.chatbox_id))
-            return prev;
+      // socket.current.on("chat-created", ({ chatbox }) => {
+      //   console.log("📩 Chat created received:", chatbox);
+      //   setFriends((prev) => {
+      //     // Prevent duplicate
+      //     if (prev.some((f) => f.chatbox_id === chatbox.chatbox_id))
+      //       return prev;
 
-          const updated = [...prev, { ...chatbox, pinned: false }];
-          return updated.sort((a, b) => {
+      //     // Fix Name mismatch on other user
+      //     const correctedFriend = {
+      //       ...chatbox,
+      //       name: chatbox.email === userEmail ? selectedFriend?.name : chatbox.name,
+      //       pinned: false,
+      //     };
+
+      //     const updated = [...prev, correctedFriend];
+
+      //     return updated.sort((a, b) => {
+      //       if (a.pinned && !b.pinned) return -1;
+      //       if (!a.pinned && b.pinned) return 1;
+      //       return new Date(b.lastModified) - new Date(a.lastModified);
+      //     });
+      //   });
+
+      // });
+
+      socket.current.on("chat-created", async () => {
+        const res = await fetch(`/api/get-friends?email=${userEmail}`);
+        const data = await res.json();
+
+        setFriends(
+          data.friends.sort((a, b) => {
             if (a.pinned && !b.pinned) return -1;
             if (!a.pinned && b.pinned) return 1;
             return new Date(b.lastModified) - new Date(a.lastModified);
-          });
-        });
+          })
+        );
       });
 
       socket.current.on("chat-deleted", ({ chatboxId }) => {
-        console.log("🗑️ Chat deleted received:", chatboxId);
         setFriends((prev) => prev.filter((f) => f.chatbox_id !== chatboxId));
       });
     }
@@ -305,7 +327,7 @@ function ChatPageInner() {
         setFriends((prev) =>
           prev.map((frnd) =>
             frnd.chatbox_id === friendId
-              ? { ...frnd, nickname: editedFriendName.trim() }
+              ? { ...frnd, name: editedFriendName.trim() }
               : frnd
           )
         );
@@ -313,7 +335,7 @@ function ChatPageInner() {
         if (selectedFriend?.chatbox_id === friendId) {
           setSelectedFriend((prev) => ({
             ...prev,
-            nickname: editedFriendName.trim(),
+            name: editedFriendName.trim(),
           }));
         }
 
@@ -427,14 +449,14 @@ function ChatPageInner() {
 
   // const handleNewChat = async () => {
   //   const searchValue = prompt(
-  //     "Enter your friend's email or nickname to start a new chat:"
+  //     "Enter your friend's email or name to start a new chat:"
   //   );
 
   //   const userEmail = localStorage.getItem("email");
   //   if (!searchValue || !userEmail) return;
 
   //   const existingChat = friends.find(
-  //     (frnd) => frnd.email === searchValue || frnd.nickname === searchValue
+  //     (frnd) => frnd.email === searchValue || frnd.name === searchValue
   //   );
   //   if (existingChat) {
   //     handleFriendSelect(existingChat);
@@ -454,7 +476,7 @@ function ChatPageInner() {
   //       const newFriend = {
   //         chatbox_id: data.chatbox._id,
   //         email: data.friend.email,
-  //         nickname: data.friend.nickname,
+  //         name: data.friend.name,
   //         lastModified: new Date().toISOString(),
   //       };
 
@@ -510,7 +532,7 @@ function ChatPageInner() {
     }
 
     const existingChat = friends.find(
-      (frnd) => frnd.email === friendEmail || frnd.nickname === friendName
+      (frnd) => frnd.email === friendEmail || frnd.name === friendName
     );
     if (existingChat) {
       handleFriendSelect(existingChat);
@@ -524,14 +546,14 @@ function ChatPageInner() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userEmail, friendEmail, friendName }),
       });
-
+      console.log("userEmail:", userEmail, "friendEmail:", friendEmail, "friendName:", friendName);
       const data = await res.json();
 
       if (data.success) {
         const newFriend = {
           chatbox_id: data.chatbox._id,
           email: data.friend.email,
-          nickname: data.friend.nickname || friendName,
+          name: friendName,
           lastModified: new Date().toISOString(),
         };
 
@@ -540,7 +562,7 @@ function ChatPageInner() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userEmail,
-            friendName: newFriend.nickname,
+            friendName: newFriend.name,
             friendEmail: newFriend.email,
             chatboxId: newFriend.chatbox_id,
           }),
@@ -841,7 +863,7 @@ function ChatPageInner() {
                       onBlur={() => {
                         if (
                           editedFriendName.trim() &&
-                          editedFriendName !== frnd.nickname
+                          editedFriendName !== frnd.name
                         ) {
                           handleEditChatName(frnd.chatbox_id);
                         }
@@ -852,7 +874,7 @@ function ChatPageInner() {
                           e.preventDefault();
                           if (
                             editedFriendName.trim() &&
-                            editedFriendName !== frnd.nickname
+                            editedFriendName !== frnd.name
                           ) {
                             handleEditChatName(frnd.chatbox_id);
                           }
@@ -869,7 +891,7 @@ function ChatPageInner() {
                       onClick={() => handleFriendSelect(frnd)}
                       onDoubleClick={() => {
                         setEditingFriendId(frnd.chatbox_id);
-                        setEditedFriendName(frnd.nickname || "");
+                        setEditedFriendName(frnd.name || "");
                       }}
                       className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
                         ? "bg-purple-200 text-purple-800"
@@ -880,7 +902,7 @@ function ChatPageInner() {
                         }`}
                     >
                       <span className="block truncate max-w-[75%]  items-center gap-1">
-                        <span>{frnd.nickname || frnd.email}</span>
+                        <span>{frnd.name || frnd.email}</span>
                       </span>
                     </button>
                   )}
@@ -930,7 +952,7 @@ function ChatPageInner() {
                         <button
                           onClick={() => {
                             setEditingFriendId(frnd.chatbox_id);
-                            setEditedFriendName(frnd.nickname || "");
+                            setEditedFriendName(frnd.name || "");
                             setMenuOpenId(null);
                           }}
                           className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-left"
@@ -1051,7 +1073,6 @@ function ChatPageInner() {
                       {msg.senderEmail === userEmail
                         ? "You"
                         : selectedFriend?.name ||
-                        selectedFriend?.nickname ||
                         selectedFriend?.email ||
                         "Friend"}
                     </div>
@@ -1330,7 +1351,7 @@ function ChatPageInner() {
               <p className="text-gray-500 text-sm mb-6">
                 This will permanently delete the chat with{" "}
                 <span className="font-medium text-gray-700">
-                  {chatToDelete?.nickname || chatToDelete?.email}
+                  {chatToDelete?.name || chatToDelete?.email}
                 </span>
                 . This action cannot be undone.
               </p>
@@ -1380,7 +1401,7 @@ function ChatPageInner() {
               type="text"
               value={newFriendInput}
               onChange={(e) => setNewFriendInput(e.target.value)}
-              placeholder="Enter friend's email or nickname"
+              placeholder="Enter friend's email or name"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <div className="flex justify-end gap-3 mt-4">
