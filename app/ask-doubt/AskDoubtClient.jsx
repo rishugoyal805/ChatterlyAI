@@ -358,7 +358,7 @@ export default function AskDoubtClient() {
   };
 
   useEffect(() => {
-    if (!convoId) return;
+    if (!convoId || convoId === "Temporary Chat") return;
 
     const fetchConversation = async () => {
       try {
