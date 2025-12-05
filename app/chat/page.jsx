@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { TiPinOutline } from "react-icons/ti";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { io } from "socket.io-client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -48,6 +48,7 @@ export default function AskDoubtPage() {
   const inputRef = useRef(null);
   const socket = useRef(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [editingIndex, setEditingIndex] = useState(null);
   const [editingText, setEditingText] = useState("");
   const [updatedChatboxId, setUpdatedChatboxId] = useState(null);
@@ -103,7 +104,16 @@ export default function AskDoubtPage() {
         })
       );
 
-      // ✅ Load last chat after setting friends
+      // ✅ Prefer chatboxId from URL, else fallback to last stored
+      const chatboxIdFromUrl = searchParams.get("chatboxId");
+      if (chatboxIdFromUrl) {
+        const fromUrl = data.friends.find((f) => f.chatbox_id === chatboxIdFromUrl);
+        if (fromUrl) {
+          handleFriendSelect(fromUrl);
+          return;
+        }
+      }
+
       const lastId = localStorage.getItem("lastChatboxId");
       if (lastId) {
         const last = data.friends.find((f) => f.chatbox_id === lastId);
@@ -540,6 +550,7 @@ export default function AskDoubtPage() {
         });
 
         handleFriendSelect(newFriend);
+        router.replace(`/chat?chatboxId=${newFriend.chatbox_id}`);
         setIsAddFriendModalOpen(false);
         setNewFriendInput("");
       } else {
@@ -553,6 +564,7 @@ export default function AskDoubtPage() {
   const handleFriendSelect = async (friend) => {
     setSelectedFriend(friend);
     localStorage.setItem("lastChatboxId", friend.chatbox_id);
+    router.replace(`/chat?chatboxId=${friend.chatbox_id}`);
 
     // Step 1: Fetch chatbox details
     const res = await fetch(`/api/get-chatbox?chatbox_id=${friend.chatbox_id}`);
@@ -726,9 +738,8 @@ export default function AskDoubtPage() {
       {/* Sidebar */}
       <div
         ref={sidebarRef}
-        className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-white/20 z-50 transform transition-transform duration-300 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0`}
+        className={`fixed left-0 top-0 h-full w-64 bg-white/80 backdrop-blur-md border-r border-white/20 z-50 transform transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0`}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
@@ -846,15 +857,13 @@ export default function AskDoubtPage() {
                         setEditingFriendId(frnd.chatbox_id);
                         setEditedFriendName(frnd.nickname || "");
                       }}
-                      className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${
-                        selectedFriend?.chatbox_id === frnd.chatbox_id
-                          ? "bg-purple-200 text-purple-800"
-                          : "hover:bg-gray-100 text-gray-700"
-                      } ${
-                        updatedChatboxId === frnd.chatbox_id
+                      className={`w-full text-left px-4 py-2 rounded-xl transition-colors transform duration-300 ${selectedFriend?.chatbox_id === frnd.chatbox_id
+                        ? "bg-purple-200 text-purple-800"
+                        : "hover:bg-gray-100 text-gray-700"
+                        } ${updatedChatboxId === frnd.chatbox_id
                           ? "scale-[1.03] shadow-md"
                           : ""
-                      }`}
+                        }`}
                     >
                       <span className="block truncate max-w-[75%]  items-center gap-1">
                         <span>{frnd.nickname || frnd.email}</span>
@@ -882,11 +891,10 @@ export default function AskDoubtPage() {
                           prev === frnd.chatbox_id ? null : frnd.chatbox_id
                         );
                       }}
-                      className={`p-1 rounded transition-colors ${
-                        menuOpenId === frnd.chatbox_id
-                          ? "bg-gray-200"
-                          : "hover:bg-gray-100"
-                      }`}
+                      className={`p-1 rounded transition-colors ${menuOpenId === frnd.chatbox_id
+                        ? "bg-gray-200"
+                        : "hover:bg-gray-100"
+                        }`}
                     >
                       <EllipsisVertical size={16} />
                     </button>
@@ -1014,26 +1022,24 @@ export default function AskDoubtPage() {
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`flex ${
-                    msg.senderEmail === userEmail
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
+                  className={`flex ${msg.senderEmail === userEmail
+                    ? "justify-end"
+                    : "justify-start"
+                    }`}
                 >
                   <div
-                    className={`px-4 py-3 rounded-xl shadow-md max-w-[100vw] md:max-w-md ${
-                      msg.senderEmail === userEmail
-                        ? "bg-purple-100 text-right rounded-br-none"
-                        : "bg-blue-100 text-left rounded-bl-none self-start"
-                    }`}
+                    className={`px-4 py-3 rounded-xl shadow-md max-w-[100vw] md:max-w-md ${msg.senderEmail === userEmail
+                      ? "bg-purple-100 text-right rounded-br-none"
+                      : "bg-blue-100 text-left rounded-bl-none self-start"
+                      }`}
                   >
                     <div className="text-xs font-semibold text-gray-600 mb-1">
                       {msg.senderEmail === userEmail
                         ? "You"
                         : selectedFriend?.name ||
-                          selectedFriend?.nickname ||
-                          selectedFriend?.email ||
-                          "Friend"}
+                        selectedFriend?.nickname ||
+                        selectedFriend?.email ||
+                        "Friend"}
                     </div>
 
                     <div className="markdown-content text-sm text-gray-800 max-w-[90vw] md:max-w-md overflow-x-auto whitespace-pre-wrap break-words">
@@ -1116,8 +1122,8 @@ export default function AskDoubtPage() {
                                       {typeof children === "string"
                                         ? children
                                         : Array.isArray(children)
-                                        ? children.join("")
-                                        : ""}
+                                          ? children.join("")
+                                          : ""}
                                     </code>
                                   </pre>
                                   <div
@@ -1274,11 +1280,10 @@ export default function AskDoubtPage() {
                 />
                 <button
                   onClick={sendMessage}
-                  className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full transition ${
-                    !input.trim()
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:opacity-90"
-                  }`}
+                  className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-full transition ${!input.trim()
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:opacity-90"
+                    }`}
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -1345,7 +1350,7 @@ export default function AskDoubtPage() {
         )}
       </AnimatePresence>
       {isAddFriendModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-80">
             <h2 className="text-lg font-semibold mb-4 text-gray-800">
               Add New Friend
