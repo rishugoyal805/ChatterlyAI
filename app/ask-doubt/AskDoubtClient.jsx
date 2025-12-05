@@ -196,6 +196,15 @@ export default function AskDoubtClient() {
       }));
 
       setUser_ai_chats(chats);
+      // 🔥 Redirect to latest chat if no convoId is in URL
+      if ((!convoId || convoId === "Temporary Chat") && chats.length > 0) {
+        router.replace(`/ask-doubt?convoId=${chats[0].convoId}`);
+        return; // stop further execution
+      }
+      // 🔥 If URL already has convoId, highlight it
+      if (convoId) {
+        setSelectedConvoId(convoId);
+      }
     } catch (err) {
       console.error("Fetch failed:", err);
     }
