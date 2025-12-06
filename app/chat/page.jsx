@@ -939,8 +939,13 @@ function ChatPageInner() {
                       <span className="block truncate max-w-[75%]  items-center gap-1">
                         {/* <span>{frnd.name || frnd.email}</span> */}
                         <span className="flex items-center gap-2">
-                          <span>{frnd.name || frnd.email}</span>
-
+                          <span>
+                            {frnd.name
+                              ? frnd.name.length > 12
+                                ? frnd.name.slice(0, 12)+"..."
+                                : frnd.name
+                              : frnd.email}
+                          </span>
                           {onlineMap[frnd.email] && (
                             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
                           )}
