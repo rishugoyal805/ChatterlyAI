@@ -136,7 +136,7 @@ function ChatPageInner() {
       );
 
       socket.current?.emit("request-online-users");
-      
+
       // ✅ Prefer chatboxId from URL, else fallback to last stored
       const chatboxIdFromUrl = searchParams.get("chatboxId");
       if (chatboxIdFromUrl) {
@@ -941,10 +941,8 @@ function ChatPageInner() {
                         <span className="flex items-center gap-2">
                           <span>{frnd.name || frnd.email}</span>
 
-                          {onlineMap[frnd.email] ? (
+                          {onlineMap[frnd.email] && (
                             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                          ) : (
-                            <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
                           )}
                         </span>
 
@@ -1074,7 +1072,7 @@ function ChatPageInner() {
                 )}
               </button>
               <h1 className="text-2xl font-bold text-gray-800 flex items-center space-x-3">
-                <MessageCircleMore class="w-6 h-6" />
+                <MessageCircleMore className="w-6 h-6" />
                 <span>Chat with Friends</span>
               </h1>
             </div>
