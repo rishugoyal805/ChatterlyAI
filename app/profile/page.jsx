@@ -21,13 +21,25 @@ import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { getSession } from "next-auth/react";
 
+// Reusable password rule component
+const PasswordCheck = ({ label, valid }) => (
+  <div className="flex items-center gap-2 text-sm">
+    {valid ? (
+      <span className="text-green-600 font-bold">✔</span>
+    ) : (
+      <span className="text-red-500 font-bold">✘</span>
+    )}
+    <span className={valid ? "text-green-600" : "text-red-500"}>{label}</span>
+  </div>
+);
+
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    nickname: "",
-    pass: "",
-    // branch: "",
+    oldPass: "",
+    newPass: "",
+    confirmPass: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -70,14 +82,43 @@ export default function ProfilePage() {
     }
   };
 
+  // --- PASSWORD VALIDATION ---
+  const { newPass: password = "", confirmPass = "" } = formData;
+
+  const passwordChecks = {
+    length: password.length >= 8,
+    upper: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+    match: password && password === confirmPass,
+  };
+
+  const allGood =
+    passwordChecks.length &&
+    passwordChecks.upper &&
+    passwordChecks.number &&
+    passwordChecks.special &&
+    passwordChecks.match;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
     setError("");
     setSuccess("");
 
-    if (!formData.pass) {
-      setError("Password is required.");
+    if (!formData.oldPass) {
+      setError("Old Password is required.");
+      setIsSaving(false);
+      return;
+    }
+    if (!formData.newPass) {
+      setError("New Password is required.");
+      setIsSaving(false);
+      return;
+    }
+    if (!allGood) {
+      setError("New password does not meet all requirements.");
+      setIsSaving(false);
       return;
     }
 
@@ -95,6 +136,12 @@ export default function ProfilePage() {
 
       if (response.ok) {
         setSuccess("Profile updated successfully!");
+        setFormData((prev) => ({
+          ...prev,
+          oldPass: "",
+          newPass: "",
+          confirmPass: "",
+        }));
       } else {
         setError(data.message || "Failed to update profile");
       }
@@ -262,7 +309,17 @@ export default function ProfilePage() {
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-3xl p-8">
               <div className="flex items-center space-x-4">
                 <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                  <User className="w-8 h-8 text-white" />
+                  {user?.image ? (
+                    <img
+                      src={user.image}
+                      alt="User"
+                      className="w-full h-full object-contain rounded-xl"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold mb-2">Profile Settings</h1>
@@ -347,10 +404,30 @@ export default function ProfilePage() {
                       disabled
                     />
                   </div>
-
                   <div>
                     <label
-                      htmlFor="pass"
+                      htmlFor="oldPass"
+                      className="block text-sm font-medium text-gray-700 mb-2"
+                    >
+                      <div className="flex items-center">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Old Password
+                      </div>
+                    </label>
+                    <input
+                      type="password"
+                      id="oldPass"
+                      name="oldPass"
+                      value={formData.oldPass}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                      placeholder="Enter old password"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="newPass"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
                       <div className="flex items-center">
@@ -360,55 +437,55 @@ export default function ProfilePage() {
                     </label>
                     <input
                       type="password"
-                      id="pass"
-                      name="pass"
-                      value={formData.pass}
+                      id="newPass"
+                      name="newPass"
+                      value={formData.newPass}
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
                       placeholder="Enter new password"
                     />
                   </div>
-
                   <div>
-                    <label
-                      htmlFor="college"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      <div className="flex items-center">
-                        <School className="w-4 h-4 mr-2" />
-                        NickName
-                      </div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm New Password
                     </label>
                     <input
-                      type="text"
-                      id="nickname"
-                      name="nickname"
-                      value={formData.nickname || ""} // ✅ FIXED
+                      type="password"
+                      name="confirmPass"
+                      value={formData.confirmPass}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                      placeholder="Enter your nickname"
+                      required
+                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="Confirm new password"
                     />
                   </div>
 
-                  {/* <div>
-                    <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-2">
-                      <div className="flex items-center">
-                        <BookMarked className="w-4 h-4 mr-2" />
-                        Branch/Major
-                      </div>
-                    </label>
-                    <input
-                      type="text"
-                      id="branch"
-                      name="branch"
-                      value={formData.branch}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                      placeholder="Enter your branch or major"
-                    />
-                  </div> */}
-
+                  {/* Password Rules */}
+                  {password.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      <PasswordCheck
+                        label="At least 8 characters"
+                        valid={passwordChecks.length}
+                      />
+                      <PasswordCheck
+                        label="One uppercase letter"
+                        valid={passwordChecks.upper}
+                      />
+                      <PasswordCheck
+                        label="One number"
+                        valid={passwordChecks.number}
+                      />
+                      <PasswordCheck
+                        label="One special character"
+                        valid={passwordChecks.special}
+                      />
+                      <PasswordCheck
+                        label="Passwords match"
+                        valid={passwordChecks.match}
+                      />
+                    </div>
+                  )}
                   <button
                     type="submit"
                     disabled={isSaving}
