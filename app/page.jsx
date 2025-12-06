@@ -51,7 +51,7 @@ export default function LandingPage() {
         "Get help with coding, debugging, and algorithm explanations using AI.",
     },
     {
-      icon: IoShieldCheckmarkOutline,
+      icon: IoShieldCheckmarkOutline, 
       title: "Privacy & Security",
       description:
         "All user data stays private with end-to-end encrypted sessions and local storage.",
