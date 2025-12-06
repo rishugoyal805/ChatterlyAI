@@ -7,7 +7,7 @@ export async function POST() {
     { status: 200 }
   );
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   // Remove ALL your app cookies here
   const allCookies = cookieStore.getAll();

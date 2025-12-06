@@ -39,6 +39,7 @@ export default function Dashboard() {
 
     fetchSession();
   }, []);
+
   useEffect(() => {
     const checkAuth = async () => {
       const session = await getSession();

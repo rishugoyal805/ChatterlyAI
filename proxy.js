@@ -115,9 +115,6 @@ export async function proxy(request) {
 
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-  /* ----------------------------
-     1️⃣ CUSTOM JWT AUTH
-  -----------------------------*/
   if (jwtToken) {
     try {
       await jwtVerify(jwtToken, secret);
@@ -132,16 +129,10 @@ export async function proxy(request) {
     }
   }
 
-  /* ----------------------------
-     2️⃣ NEXT-AUTH AUTH
-  -----------------------------*/
   if (nextAuthToken) {
     return NextResponse.next();
   }
 
-  /* ----------------------------
-     3️⃣ NO AUTH – REDIRECT
-  -----------------------------*/
   const response = NextResponse.redirect(new URL("/", request.url));
   return response;
 }
