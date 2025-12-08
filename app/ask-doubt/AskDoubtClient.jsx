@@ -1686,30 +1686,47 @@ export default function AskDoubtClient() {
                             <ReactMarkdown
                               remarkPlugins={[remarkGfm]}
                               components={{
+                                // p: ({ children }) => {
+                                //   // Ensure children is an array
+                                //   const childArray = Array.isArray(children)
+                                //     ? children
+                                //     : [children];
+
+                                //   // Compute total text length for alignment
+                                //   const textLength = childArray
+                                //     .map((c) =>
+                                //       typeof c === "string" ? c : ""
+                                //     )
+                                //     .join("").length;
+
+                                //   // Short message → fully right-aligned for user
+                                //   if (msg.role === "user" && textLength <= 64) {
+                                //     return (
+                                //       <p className="mb-1 text-right">
+                                //         {children}
+                                //       </p>
+                                //     );
+                                //   }
+
+                                //   // Long message → normal wrap
+                                //   return <p className="mb-1">{children}</p>;
+                                // },
                                 p: ({ children }) => {
-                                  // Ensure children is an array
-                                  const childArray = Array.isArray(children)
-                                    ? children
-                                    : [children];
+                                  // total length of complete message, not per-paragraph children
+                                  const totalLength = (msg.text || "").length;
 
-                                  // Compute total text length for alignment
-                                  const textLength = childArray
-                                    .map((c) =>
-                                      typeof c === "string" ? c : ""
-                                    )
-                                    .join("").length;
+                                  const isShort =
+                                    msg.role === "user" && totalLength <= 64;
 
-                                  // Short message → fully right-aligned for user
-                                  if (msg.role === "user" && textLength <= 64) {
-                                    return (
-                                      <p className="mb-1 text-right">
-                                        {children}
-                                      </p>
-                                    );
-                                  }
-
-                                  // Long message → normal wrap
-                                  return <p className="mb-1">{children}</p>;
+                                  return (
+                                    <p
+                                      className={`mb-1 ${
+                                        isShort ? "text-right" : ""
+                                      }`}
+                                    >
+                                      {children}
+                                    </p>
+                                  );
                                 },
 
                                 img: ({ src, alt }) => (
