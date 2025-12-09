@@ -105,7 +105,7 @@ export default function AskDoubtClient() {
 
   useEffect(() => {
     if (!userEmail) return;
-    socket.current = io("https://chatterly-backend-2-es62.onrender.com"); // URL of socket server
+    socket.current = io(process.env.NEXT_PUBLIC_AI_SOCKET_BACKEND_URL); // URL of socket server
 
     socket.current.emit("join-user", userEmail);
 
@@ -461,7 +461,7 @@ export default function AskDoubtClient() {
       const { insertedId: userMessageId } = await userRes.json();
       // 3️⃣ Call AI API to get response
       const aiRes = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`,
+        `${process.env.NEXT_PUBLIC_AGENTIC_BACKEND_URL}/chat`,
         {
           user_id: userEmail,
           message: input,
@@ -758,7 +758,7 @@ export default function AskDoubtClient() {
 
       // 🔹 Fetch new AI response
       const aiRes = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/chat`,
+        `${process.env.NEXT_PUBLIC_AGENTIC_BACKEND_URL}/chat`,
         {
           user_id: userEmail,
           message: text,

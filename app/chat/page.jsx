@@ -228,7 +228,7 @@ function ChatPageInner() {
   useEffect(() => {
     if (!userEmail) return;
     if (!socket.current) {
-      socket.current = io("https://Chatterly-backend-8dwx.onrender.com", {
+      socket.current = io(process.env.NEXT_PUBLIC_CHAT_SOCKET_BACKEND_URL, {
         transports: ["websocket"], // ensure real-time connection
       });
 
