@@ -10,6 +10,9 @@ export const metadata = {
   description:
     "Join thousands of people who are revolutionizing their Working experience with collaborative AI assistance with friends.",
   description: "A safe AI demo built for educational purposes. No data stored.",
+   icons: {
+    icon: "/favicon.ico", // optional but explicit
+  },
 };
 
 export default function RootLayout({ children }) {
