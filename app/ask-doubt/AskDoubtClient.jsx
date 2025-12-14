@@ -1415,7 +1415,7 @@ export default function AskDoubtClient() {
                   )}
                 </button>
                 <Lightbulb className="w-5 h-5" />
-                <h1 className="text-2xl font-bold text-gray-800">Chatbot</h1>
+                <h1 className=" text-sm md:text-xl lg:text-2xl font-bold text-gray-800">Chatbot</h1>
               </div>
 
               {/* Right section: Notification + Profile */}

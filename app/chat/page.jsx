@@ -1140,7 +1140,7 @@ function ChatPageInner() {
                   <Menu className="w-6 h-6" />
                 )}
               </button>
-              <h1 className="text-2xl font-bold text-gray-800 flex items-center space-x-3">
+              <h1 className="text-sm md:text-xl lg:text-2xl font-bold text-gray-800 flex items-center space-x-3">
                 <MessageCircleMore className="w-6 h-6" />
                 <span>Chat with Friends</span>
               </h1>

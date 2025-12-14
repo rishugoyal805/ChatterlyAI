@@ -317,21 +317,6 @@ export default function LandingPage() {
                   This is a student-built AI Project. No personal information is
                   stored or shared.
                 </p>
-{/* 
-                <p
-                  className="
-    text-lg md:text-xl lg:text-2xl
-    font-medium sm:font-medium md:font-normal
-    text-gray-600
-    mb-6
-    max-w-3xl mx-auto
-    leading-snug sm:leading-relaxed
-  "
-                >
-                  Join thousands of people revolutionizing their working
-                  experience with collaborative AI assistance.
-                </p> */}
-
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <Link
                     href="/signup"
