@@ -48,7 +48,7 @@ export default function FallbackLayout({ isSidebarOpen, setIsSidebarOpen }) {
 
             <Link
               href="/ask-doubt"
-              className="flex items-center space-x-3 px-4 py-3 bg-purple-100 text-purple-700 rounded-xl transition-colors"
+              className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl"
             >
               <Lightbulb className="w-5 h-5" />
               <span>Chat</span>
@@ -56,7 +56,7 @@ export default function FallbackLayout({ isSidebarOpen, setIsSidebarOpen }) {
 
             <Link
               href="/chat"
-              className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl"
+              className="flex items-center space-x-3 px-4 py-3 bg-purple-100 text-purple-700 rounded-xl transition-colors"
             >
               <MessageCircleMore className="w-5 h-5" />
               <span>Chat with Friends</span>

@@ -1,6 +1,6 @@
 //Chat page
 "use client";
-
+import FallbackLayout from "./FallbackLayout";
 import React, { Suspense, useState, useEffect, useRef } from "react";
 import {
   Lightbulb,
@@ -34,7 +34,10 @@ export default function AskDoubtPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-4 text-center text-gray-600">Loading chat...</div>
+        <FallbackLayout
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
       }
     >
       <ChatPageInner />
